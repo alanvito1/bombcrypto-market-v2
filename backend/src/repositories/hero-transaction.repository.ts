@@ -433,6 +433,29 @@ export class HeroTransactionRepository implements IHeroTransactionRepository {
             .from('hero_orders');
 
         this.applyFilterConditions(qb, context);
+
+        // Security: Whitelist orderBy columns to prevent SQL injection
+        const validSortColumns = [
+            'id',
+            'updated_at',
+            'block_number',
+            'block_timestamp',
+            'amount',
+            'rarity',
+            'level',
+            'token_id',
+            'stamina',
+            'speed',
+            'bomb_power',
+            'bomb_count',
+            'bomb_range',
+            'pay_token',
+        ];
+
+        if (!validSortColumns.includes(context.orderBy)) {
+            context.orderBy = 'updated_at';
+        }
+
         qb.paginate(context);
 
         return qb;
