@@ -22,3 +22,8 @@
 **Vulnerability:** The backend API lacked explicit CORS configuration, potentially allowing `helmet` defaults or proxy configurations to be the only line of defense.
 **Learning:** Monorepo setups with local proxies often mask the need for strict CORS on the backend itself. However, when deployed or accessed directly, the API remains exposed.
 **Prevention:** Implemented `cors` middleware with configurable `CORS_ORIGIN` support to enforce strict origin validation at the application level.
+
+## 2026-02-20 - Missing Input Length Limit (DoS Risk)
+**Vulnerability:** The `size` parameter in `getHistory`, `heroSearch`, and `houseSearch` endpoints was not capped, allowing attackers to request excessively large pages (e.g., `size=1000000`). This would cause the backend to attempt fetching and returning huge datasets, leading to potential Denial of Service (DoS) and database strain.
+**Learning:** Even with parameterized queries preventing SQL injection, input validation for logical limits (like page size) is crucial. Developers often trust that frontend will send reasonable values, but APIs are exposed to anyone.
+**Prevention:** Enforce strict upper bounds on all list/search endpoints using `MAX_PAGE_SIZE` constants. Normalize pagination inputs centrally where possible, or explicitly clamp values in handlers.
