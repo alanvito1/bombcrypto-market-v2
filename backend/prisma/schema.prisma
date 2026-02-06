@@ -1,0 +1,289 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema", "postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  schemas    = ["bsc", "polygon"]
+  extensions = [citext]
+}
+
+// ------------------------------------
+// BSC Schema
+// ------------------------------------
+
+model BscHeroAbility {
+  id               Int      @id @default(autoincrement())
+  hero_token_id    BigInt?
+  ability_token_id Int?     @db.SmallInt
+  created_at       DateTime @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime? @default(now()) @db.Timestamptz(6)
+  deleted          Boolean  @default(false)
+
+  @@unique([hero_token_id, ability_token_id], map: "hero_abilities_hero_token_id_ability_token_id_key")
+  @@map("hero_abilities")
+  @@schema("bsc")
+}
+
+model BscHeroOrder {
+  id                    BigInt   @id @default(autoincrement())
+  tx_hash               String   @unique(map: "hero_orders_tx_hash_key") @db.Citext
+  block_number          BigInt
+  block_timestamp       DateTime @default(now()) @db.Timestamptz(6)
+  nft_block_number      BigInt
+  buyer_wallet_address  String?  @default("") @db.Citext
+  seller_wallet_address String?  @db.Citext
+  status                String?  @default("listing") @db.VarChar(255)
+  amount                Decimal? @default(0) @db.Decimal(78, 0)
+  token_id              BigInt
+  rarity                BigInt?
+  level                 Int?     @db.SmallInt
+  color                 Int?     @db.SmallInt
+  skin                  Int?     @db.SmallInt
+  stamina               Int?     @db.SmallInt
+  speed                 Int?     @db.SmallInt
+  bomb_skin             Int?     @db.SmallInt
+  bomb_count            Int?     @db.SmallInt
+  bomb_power            Int?     @db.SmallInt
+  bomb_range            Int?     @db.SmallInt
+  abilities             String?  @db.VarChar(255)
+
+  ability_1             Boolean?
+  ability_2             Boolean?
+  ability_3             Boolean?
+  ability_4             Boolean?
+  ability_5             Boolean?
+  ability_6             Boolean?
+  ability_7             Boolean?
+
+  abilities_hero_s      String?  @db.VarChar(255)
+  created_at            DateTime @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime? @default(now()) @db.Timestamptz(6)
+  deleted               Boolean  @default(false)
+  pay_token             String?  @default("") @db.VarChar(255)
+
+  @@map("hero_orders")
+  @@schema("bsc")
+}
+
+model BscHeroSAbility {
+  id               Int      @id @default(autoincrement())
+  hero_token_id    BigInt?
+  ability_token_id Int?     @db.SmallInt
+  created_at       DateTime @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime? @default(now()) @db.Timestamptz(6)
+  deleted          Boolean  @default(false)
+
+  @@unique([hero_token_id, ability_token_id], map: "hero_s_abilities_hero_token_id_ability_token_id_key")
+  @@map("hero_s_abilities")
+  @@schema("bsc")
+}
+
+model BscHeroSubscriberBlockNumber {
+  id           Boolean @id
+  block_number BigInt
+
+  @@map("hero_subscriber_block_number")
+  @@schema("bsc")
+}
+
+model BscHeroSubscriberFailedBlock {
+  block_number BigInt   @id
+  failure      Int      @default(1) @db.SmallInt
+  created_at   DateTime @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@map("hero_subscriber_failed_blocks")
+  @@schema("bsc")
+}
+
+model BscHouseOrder {
+  id                    BigInt   @id @default(autoincrement())
+  tx_hash               String   @unique(map: "house_orders_tx_hash_key") @db.Citext
+  block_number          BigInt
+  block_timestamp       DateTime @default(now()) @db.Timestamptz(6)
+  nft_block_number      BigInt
+  buyer_wallet_address  String?  @default("") @db.Citext
+  seller_wallet_address String?  @db.Citext
+  status                String?  @default("listing") @db.VarChar(255)
+  amount                Decimal? @default(0) @db.Decimal(78, 0)
+  token_id              BigInt
+  rarity                Int?     @db.SmallInt
+  recovery              Int?     @db.SmallInt
+  capacity              Int?     @db.SmallInt
+  created_at            DateTime @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime? @default(now()) @db.Timestamptz(6)
+  deleted               Boolean  @default(false)
+  pay_token             String?  @default("") @db.VarChar(255)
+
+  @@map("house_orders")
+  @@schema("bsc")
+}
+
+model BscHouseSubscriberBlockNumber {
+  id           Boolean @id
+  block_number BigInt
+
+  @@map("house_subscriber_block_number")
+  @@schema("bsc")
+}
+
+model BscHouseSubscriberFailedBlock {
+  block_number BigInt   @id
+  failure      Int      @default(1) @db.SmallInt
+  created_at   DateTime @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@map("house_subscriber_failed_blocks")
+  @@schema("bsc")
+}
+
+model BscSubsTransfer {
+  id              String  @id
+  last_block      BigInt?
+  last_checked_id BigInt? @default(0)
+
+  @@map("subs_transfer")
+  @@schema("bsc")
+}
+
+// ------------------------------------
+// Polygon Schema
+// ------------------------------------
+
+model PolygonHeroAbility {
+  id               Int      @id @default(autoincrement())
+  hero_token_id    BigInt?
+  ability_token_id Int?     @db.SmallInt
+  created_at       DateTime @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime? @default(now()) @db.Timestamptz(6)
+  deleted          Boolean  @default(false)
+
+  @@unique([hero_token_id, ability_token_id], map: "hero_abilities_hero_token_id_ability_token_id_key")
+  @@map("hero_abilities")
+  @@schema("polygon")
+}
+
+model PolygonHeroOrder {
+  id                    BigInt   @id @default(autoincrement())
+  tx_hash               String   @unique(map: "hero_orders_tx_hash_key") @db.Citext
+  block_number          BigInt
+  block_timestamp       DateTime @default(now()) @db.Timestamptz(6)
+  nft_block_number      BigInt
+  buyer_wallet_address  String?  @default("") @db.Citext
+  seller_wallet_address String?  @db.Citext
+  status                String?  @default("listing") @db.VarChar(255)
+  amount                Decimal? @default(0) @db.Decimal(78, 0)
+  token_id              BigInt
+  rarity                BigInt?
+  level                 Int?     @db.SmallInt
+  color                 Int?     @db.SmallInt
+  skin                  Int?     @db.SmallInt
+  stamina               Int?     @db.SmallInt
+  speed                 Int?     @db.SmallInt
+  bomb_skin             Int?     @db.SmallInt
+  bomb_count            Int?     @db.SmallInt
+  bomb_power            Int?     @db.SmallInt
+  bomb_range            Int?     @db.SmallInt
+  abilities             String?  @db.VarChar(255)
+
+  ability_1             Boolean?
+  ability_2             Boolean?
+  ability_3             Boolean?
+  ability_4             Boolean?
+  ability_5             Boolean?
+  ability_6             Boolean?
+  ability_7             Boolean?
+
+  abilities_hero_s      String?  @db.VarChar(255)
+  created_at            DateTime @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime? @default(now()) @db.Timestamptz(6)
+  deleted               Boolean  @default(false)
+  pay_token             String?  @default("") @db.VarChar(255)
+
+  @@map("hero_orders")
+  @@schema("polygon")
+}
+
+model PolygonHeroSAbility {
+  id               Int      @id @default(autoincrement())
+  hero_token_id    BigInt?
+  ability_token_id Int?     @db.SmallInt
+  created_at       DateTime @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime? @default(now()) @db.Timestamptz(6)
+  deleted          Boolean  @default(false)
+
+  @@unique([hero_token_id, ability_token_id], map: "hero_s_abilities_hero_token_id_ability_token_id_key")
+  @@map("hero_s_abilities")
+  @@schema("polygon")
+}
+
+model PolygonHeroSubscriberBlockNumber {
+  id           Boolean @id
+  block_number BigInt
+
+  @@map("hero_subscriber_block_number")
+  @@schema("polygon")
+}
+
+model PolygonHeroSubscriberFailedBlock {
+  block_number BigInt   @id
+  failure      Int      @default(1) @db.SmallInt
+  created_at   DateTime @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@map("hero_subscriber_failed_blocks")
+  @@schema("polygon")
+}
+
+model PolygonHouseOrder {
+  id                    BigInt   @id @default(autoincrement())
+  tx_hash               String   @unique(map: "house_orders_tx_hash_key") @db.Citext
+  block_number          BigInt
+  block_timestamp       DateTime @default(now()) @db.Timestamptz(6)
+  nft_block_number      BigInt
+  buyer_wallet_address  String?  @default("") @db.Citext
+  seller_wallet_address String?  @db.Citext
+  status                String?  @default("listing") @db.VarChar(255)
+  amount                Decimal? @default(0) @db.Decimal(78, 0)
+  token_id              BigInt
+  rarity                Int?     @db.SmallInt
+  recovery              Int?     @db.SmallInt
+  capacity              Int?     @db.SmallInt
+  created_at            DateTime @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime? @default(now()) @db.Timestamptz(6)
+  deleted               Boolean  @default(false)
+  pay_token             String?  @default("") @db.VarChar(255)
+
+  @@map("house_orders")
+  @@schema("polygon")
+}
+
+model PolygonHouseSubscriberBlockNumber {
+  id           Boolean @id
+  block_number BigInt
+
+  @@map("house_subscriber_block_number")
+  @@schema("polygon")
+}
+
+model PolygonHouseSubscriberFailedBlock {
+  block_number BigInt   @id
+  failure      Int      @default(1) @db.SmallInt
+  created_at   DateTime @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@map("house_subscriber_failed_blocks")
+  @@schema("polygon")
+}
+
+model PolygonSubsTransfer {
+  id              String  @id
+  last_block      BigInt?
+  last_checked_id BigInt? @default(0)
+
+  @@map("subs_transfer")
+  @@schema("polygon")
+}
