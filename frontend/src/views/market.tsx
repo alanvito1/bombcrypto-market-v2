@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import styled from "styled-components";
 import { List } from "../components/icons/index";
+import Chart from "../components/icons/chart";
+import PulseDashboard from "../components/dashboard/PulseDashboard";
 import Slider from "../components/forms/range";
 import GroupCheckBox from "../components/forms/checkbox";
 import GroupCheckBoxToken from "../components/forms/checkboxToken";
@@ -55,6 +57,10 @@ const comp: ViewComp[] = [
   {
     value: "list",
     icon: <List />,
+  },
+  {
+    value: "pulse",
+    icon: <Chart />,
   },
 ];
 
@@ -365,12 +371,16 @@ const Statistics: React.FC = () => {
             </div>
           )}
 
-          {data && (
-            <BeHeroCard
-              data={data as any}
-              view={view as "list" | "card"}
-              network={network}
-            />
+          {data && view === "pulse" ? (
+            <PulseDashboard data={data} totalCount={params.total_count} />
+          ) : (
+            data && (
+              <BeHeroCard
+                data={data as any}
+                view={view as "list" | "card"}
+                network={network}
+              />
+            )
           )}
           <WrapPagination>
             <Pagination
