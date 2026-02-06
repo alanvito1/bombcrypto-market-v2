@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import styled from "styled-components";
 import { List } from "../components/icons/index";
 import Chart from "../components/icons/chart";
@@ -12,7 +12,6 @@ import Ability from "../components/forms/ability";
 import BeHeroCard from "../components/list/market-bhero";
 import { NavLink, useHistory, useLocation } from "react-router-dom";
 import {
-  debounce,
   convertFilter,
   convertQueryToObject,
   getAPI,
@@ -130,6 +129,8 @@ const Statistics: React.FC = () => {
   const [data, setData] = useState<ListItem[] | null>(null);
   const [preHeroS, setPreHeroS] = useState<number[]>([]);
   const payload = useRef<ParamsState>();
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const fetchRef = useRef<(params: ParamsState) => Promise<void>>();
 
   const options = [
     { label: "Common", value: 0 },
@@ -150,16 +151,33 @@ const Statistics: React.FC = () => {
     { id: 1, label: "Max", key: "lte" },
   ];
 
-  const onChange = debounce((name: string, value: unknown) => {
-    if (params[name] === params.page) return;
-    setData(null);
-    if (name === "token_id") {
-      params.page = 1;
-    }
-    params[name] = value;
-    payload.current = params;
-    fetch(params);
-  }, 1000);
+  const handleParamChange = useCallback((name: string, value: unknown) => {
+    setParams((prev) => {
+      if (_.isEqual(prev[name], value)) return prev;
+
+      const next = { ...prev, [name]: value };
+
+      if (name === "token_id") {
+        next.page = 1;
+      }
+
+      payload.current = next;
+
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+
+      const delay = name === "token_id" ? 500 : 100;
+
+      timerRef.current = setTimeout(() => {
+        if (fetchRef.current) {
+          fetchRef.current(next);
+        }
+      }, delay);
+
+      return next;
+    });
+  }, []);
 
   const fetch = async (params: ParamsState) => {
     if (unount) return;
@@ -204,9 +222,13 @@ const Statistics: React.FC = () => {
     }, 60000);
   };
 
+  useEffect(() => {
+    fetchRef.current = fetch;
+  }, [fetch]);
+
   const onChangeSelect = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const value = event.target.value;
-    onChange("order_by", value);
+    handleParamChange("order_by", value);
   };
 
   const change = (name: string, value: unknown) => {
@@ -239,7 +261,7 @@ const Statistics: React.FC = () => {
           </Element>
         ))}
         <Option>
-          <Search onChange={onChange} name="token_id" aria-label="Search Token ID" />
+          <Search onChange={handleParamChange} name="token_id" aria-label="Search Token ID" />
           <div className="select">
             <select
               name="order_by"
@@ -283,20 +305,20 @@ const Statistics: React.FC = () => {
             options={optionsToken}
             name="pay_token"
             init={params.pay_token}
-            onChange={onChange}
+            onChange={handleParamChange}
           />
           <div className="title">Price</div>
           <FieldPrice
             options={optionsPrice}
             name="amount"
             init={params.amount}
-            onChange={onChange}
+            onChange={handleParamChange}
           />
           <div className="title">Hero Type</div>
           <div className="select" style={{ width: "50%" }}>
             <Select
               name="s_ability"
-              onChange={onChange}
+              onChange={handleParamChange}
               defaultValue={params.s_ability}
               options={[
                 { value: "", label: "All" },
@@ -310,7 +332,7 @@ const Statistics: React.FC = () => {
             options={options}
             name="rarity"
             init={params.rarity}
-            onChange={onChange}
+            onChange={handleParamChange}
           />
 
           <div className="title">Stats</div>
@@ -322,7 +344,7 @@ const Statistics: React.FC = () => {
                 max={5}
                 name="level"
                 init={params.level as unknown as string[]}
-                onChange={onChange}
+                onChange={handleParamChange}
               />
             </div>
           </div>
@@ -331,35 +353,35 @@ const Statistics: React.FC = () => {
             label="Power"
             name="bomb_power"
             init={params.bomb_power}
-            onChange={onChange}
+            onChange={handleParamChange}
           />
           <Field
             label="Speed"
             name="speed"
             init={params.speed}
-            onChange={onChange}
+            onChange={handleParamChange}
           />
           <Field
             label="Stamina"
             name="stamina"
             init={params.stamina}
-            onChange={onChange}
+            onChange={handleParamChange}
           />
           <Field
             label="Bomb num"
             name="bomb_count"
             init={params.bomb_count}
-            onChange={onChange}
+            onChange={handleParamChange}
           />
           <Field
             label="Range"
             name="bomb_range"
             init={params.bomb_range}
-            onChange={onChange}
+            onChange={handleParamChange}
           />
 
           <div className="title">Ability</div>
-          <Ability init={params.ability as unknown as number[]} onChange={onChange} name="ability" />
+          <Ability init={params.ability as unknown as number[]} onChange={handleParamChange} name="ability" />
         </div>
         <div className="right">
           {params.total_count !== 0 && (
