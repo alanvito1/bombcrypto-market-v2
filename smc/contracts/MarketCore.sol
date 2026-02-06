@@ -59,6 +59,12 @@ abstract contract MarketCore {
     );
     /// @notice Emitted when an order is cancelled by the seller.
     event CancelOrder(uint256 tokenId);
+    /// @notice Emitted when an order price is updated.
+    event OrderPriceUpdated(
+        uint256 tokenId,
+        uint256 newPrice,
+        uint64 startedAt
+    );
 
     // @dev Returns true if the claimant owns the token.
     // @param _claimant - Address claiming to own the token.
@@ -114,6 +120,34 @@ abstract contract MarketCore {
         // _removeTokenPay(_tokenId);
         //_transfer(_seller, _tokenId);
         emit CancelOrder(_tokenId);
+    }
+
+    /// @dev Internal function to update an order price.
+    /// @param _tokenId The ID of the token.
+    /// @param _newPrice The new price.
+    /// @notice Updates the price in storage and emits OrderPriceUpdated.
+    /// @notice Charges a 1% fee.
+    function _updatePrice(uint256 _tokenId, uint256 _newPrice) internal {
+        Order storage _order = tokenIdToOrder[_tokenId];
+        require(_isOnMarket(_order), "order not existed");
+        require(msg.sender == _order.seller, "only seller can update price");
+
+        // Calculate Fee (1% of new price)
+        uint256 fee = _newPrice / 100; // 1%
+
+        if (fee > 0) {
+             address tPay = getTokenPay(_tokenId);
+             IBEP20 tk = tPay != address(0) ? IBEP20(tPay) : bcoinContract;
+
+             require(
+                tk.transferFrom(msg.sender, address(this), fee),
+                "fail to transfer fee"
+             );
+        }
+
+        _order.price = _newPrice;
+
+        emit OrderPriceUpdated(_tokenId, _newPrice, _order.startedAt);
     }
 
     /// @dev Internal function to execute a purchase.

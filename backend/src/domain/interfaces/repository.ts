@@ -24,6 +24,9 @@ export interface IHeroTransactionRepository {
     // Delete all create orders for a token (when cancelled)
     deleteAllCreateOrders(tokenId: string): Promise<void>;
 
+    // Update order price
+    updatePrice(tokenId: string, newPrice: string, blockTimestamp: Date): Promise<void>;
+
     // Count orders by type and time window (hours)
     countOrders(orderType: string, windowHours: number): Promise<number>;
 
@@ -61,6 +64,9 @@ export interface IHouseTransactionRepository {
 
     // Delete all create orders for a token (when cancelled)
     deleteAllCreateOrders(tokenId: string): Promise<void>;
+
+    // Update order price
+    updatePrice(tokenId: string, newPrice: string, blockTimestamp: Date): Promise<void>;
 
     // Count orders by type and time window (hours)
     countOrders(orderType: string, windowHours: number): Promise<number>;

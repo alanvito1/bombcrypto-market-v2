@@ -36,6 +36,8 @@ export interface Web3ContextValue {
   createOrderBhouse: (id: number | string, price: string, tokenAddress: string) => Promise<string>;
   buyOrderBhouse: (id: number | string, price: string) => Promise<ContractTransactionReceipt | null>;
   cancelOrderBhouse: (id: number | string) => Promise<void>;
+  updateOrderPrice: (id: number | string, price: string) => Promise<string>;
+  updateOrderPriceBhouse: (id: number | string, price: string) => Promise<string>;
   isApprovedForAllBhouse: () => Promise<boolean | null>;
   setApprovalForAllBhouse: () => Promise<void>;
   getBHouseDetail: () => Promise<any>;
@@ -226,6 +228,21 @@ function Contract_({ children, type }: ContractProviderProps): JSX.Element {
     }
   };
 
+  const updateOrderPrice = async (id: number | string, price: string): Promise<string> => {
+    setLoading(true);
+    const result = parseEther(price);
+    try {
+      const tx = await InstanceHeroMarket?.updatePrice(id, result.toString());
+      await tx?.wait();
+      setLoading(false);
+      return "success";
+    } catch (error) {
+      console.error(error);
+      setLoading(false);
+      return "fail";
+    }
+  };
+
   const buyOrder = async (id: number | string, price: string): Promise<void> => {
     const price_BN = BigInt(price).toString();
     const tx = await InstanceHeroMarket?.buy(id, price_BN);
@@ -337,6 +354,21 @@ function Contract_({ children, type }: ContractProviderProps): JSX.Element {
     const result = parseEther(price);
     try {
       const tx = await InstancenHouseMarket?.createOrder(id, result.toString(), tokenAddress);
+      await tx?.wait();
+      setLoading(false);
+      return "success";
+    } catch (error) {
+      console.log(error);
+      setLoading(false);
+      return "fail";
+    }
+  };
+
+  const updateOrderPriceBhouse = async (id: number | string, price: string): Promise<string> => {
+    setLoading(true);
+    const result = parseEther(price);
+    try {
+      const tx = await InstancenHouseMarket?.updatePrice(id, result.toString());
       await tx?.wait();
       setLoading(false);
       return "success";
@@ -464,6 +496,8 @@ function Contract_({ children, type }: ContractProviderProps): JSX.Element {
     getBlockLatest,
     block,
     getTokenPayList,
+    updateOrderPrice,
+    updateOrderPriceBhouse,
     getHousePayList,
     SenApprove,
     SenAllowance,

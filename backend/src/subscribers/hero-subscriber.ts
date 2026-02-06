@@ -14,6 +14,7 @@ import {
     CreateOrderEvent,
     EventParser,
     SoldEvent,
+    OrderPriceUpdatedEvent,
 } from '@/infrastructure/blockchain/events/parser';
 import {HeroTxReq, TX_STATUS} from '@/domain/models/hero';
 import {Logger} from '@/utils/logger';
@@ -116,6 +117,9 @@ export class HeroSubscriber extends BaseSubscriber {
                 break;
             case 'CancelOrder':
                 await this.handleCancelOrder(event);
+                break;
+            case 'OrderPriceUpdated':
+                await this.handleUpdatePrice(event);
                 break;
         }
     }
@@ -224,6 +228,32 @@ export class HeroSubscriber extends BaseSubscriber {
 
         this.logger.info('HeroSubscriber processed CancelOrder', {
             tokenId: event.tokenId.toString(),
+        });
+    }
+
+    /**
+     * Handles the OrderPriceUpdated event.
+     *
+     * Actions:
+     * 1. Updates price and timestamp in DB.
+     *
+     * @param {OrderPriceUpdatedEvent} event - The parsed event.
+     */
+    private async handleUpdatePrice(event: OrderPriceUpdatedEvent): Promise<void> {
+        const timestamp = await this.client.getBlockTimestamp(event.blockNumber);
+        if (timestamp === null) {
+            throw new Error(`Block ${event.blockNumber} not found`);
+        }
+
+        await this.heroRepo.updatePrice(
+            event.tokenId.toString(),
+            event.newPrice.toString(),
+            new Date(timestamp * 1000)
+        );
+
+        this.logger.info('HeroSubscriber processed OrderPriceUpdated', {
+            tokenId: event.tokenId.toString(),
+            newPrice: event.newPrice.toString(),
         });
     }
 

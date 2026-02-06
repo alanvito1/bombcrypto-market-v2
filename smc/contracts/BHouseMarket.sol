@@ -177,6 +177,24 @@ contract BHouseMarket is
         _cancelOrder(_tokenId);
     }
 
+    // @dev Updates the price of an order.
+    // @param _tokenId - ID of the NFT.
+    // @param _newPrice - The new price.
+    function updatePrice(uint256 _tokenId, uint256 _newPrice) external whenNotPaused {
+        // just for safety
+        require(_newPrice == uint256(uint128(_newPrice)));
+
+        require(!isBlacklist(msg.sender), "blacklist");
+
+        Order storage order = tokenIdToOrder[_tokenId];
+        require(_isOnMarket(order), "order not existed");
+
+        // validate token is sellable with new price
+        require(isSellable(order.tokenDetail, _newPrice), "not pass sellable rule");
+
+        _updatePrice(_tokenId, _newPrice);
+    }
+
     // @dev Cancels an order when the contract is paused.
     //  Only the owner may do this, and NFTs are returned to
     //  the seller. This should only be used in emergencies.

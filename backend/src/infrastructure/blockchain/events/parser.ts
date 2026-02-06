@@ -14,6 +14,7 @@ export const EVENT_TOPICS = {
     CREATE_ORDER: keccak256('CreateOrder(uint256,uint256,uint256,address)'),
     SOLD: keccak256('Sold(uint256,uint256,uint256,address,address)'),
     CANCEL_ORDER: keccak256('CancelOrder(uint256)'),
+    ORDER_PRICE_UPDATED: keccak256('OrderPriceUpdated(uint256,uint256,uint64)'),
 } as const;
 
 /**
@@ -23,12 +24,13 @@ export const ALL_MARKET_TOPICS = [
     EVENT_TOPICS.CREATE_ORDER,
     EVENT_TOPICS.SOLD,
     EVENT_TOPICS.CANCEL_ORDER,
+    EVENT_TOPICS.ORDER_PRICE_UPDATED,
 ];
 
 /**
  * Event types
  */
-export type MarketEventType = 'CreateOrder' | 'Sold' | 'CancelOrder';
+export type MarketEventType = 'CreateOrder' | 'Sold' | 'CancelOrder' | 'OrderPriceUpdated';
 
 /**
  * CreateOrder event data
@@ -71,9 +73,22 @@ export interface CancelOrderEvent {
 }
 
 /**
+ * OrderPriceUpdated event data
+ */
+export interface OrderPriceUpdatedEvent {
+    type: 'OrderPriceUpdated';
+    tokenId: bigint;
+    newPrice: bigint;
+    startedAt: bigint;
+    transactionHash: string;
+    blockNumber: number;
+    logIndex: number;
+}
+
+/**
  * Union type for all market events
  */
-export type MarketEvent = CreateOrderEvent | SoldEvent | CancelOrderEvent;
+export type MarketEvent = CreateOrderEvent | SoldEvent | CancelOrderEvent | OrderPriceUpdatedEvent;
 
 /**
  * EventParser for parsing market contract events
@@ -138,6 +153,8 @@ export class EventParser {
                 return 'Sold';
             case EVENT_TOPICS.CANCEL_ORDER:
                 return 'CancelOrder';
+            case EVENT_TOPICS.ORDER_PRICE_UPDATED:
+                return 'OrderPriceUpdated';
             default:
                 return null;
         }
@@ -200,6 +217,15 @@ export class EventParser {
                 return {
                     type: 'CancelOrder',
                     tokenId: parsed.args[0],
+                    ...baseData,
+                };
+
+            case 'OrderPriceUpdated':
+                return {
+                    type: 'OrderPriceUpdated',
+                    tokenId: parsed.args[0],
+                    newPrice: parsed.args[1],
+                    startedAt: parsed.args[2],
                     ...baseData,
                 };
 
