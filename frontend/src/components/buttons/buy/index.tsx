@@ -10,7 +10,7 @@ import { NETWORK, SmartContracts } from "../../../utils/config";
 import { getAPI } from "../../../utils/helper";
 import { useCart } from "../../../context/cart";
 
-const ButtonBuy = styled.div`
+const ButtonBuy = styled.button`
   padding: 0.938rem 2.125rem;
   border-radius: 3px;
   font-size: 1.125rem;
@@ -25,11 +25,13 @@ const ButtonBuy = styled.div`
   border: none;
   box-shadow: none;
   max-width: 6.688rem;
+  font-family: inherit;
 
-  &.disable {
+  &:disabled {
     border: solid 2px #3f4564;
     color: #8d95b7;
     background: none;
+    cursor: not-allowed;
   }
 `;
 
@@ -104,6 +106,7 @@ const Button: React.FC<ButtonProps> = ({ data, price, id, fetchData }) => {
   }
 
   const onClick = async (item: HeroData) => {
+    // Disabled button should not fire onClick, but keeping check for safety if invoked otherwise
     if (!isAllow) return;
     if (
       item?.isToken == senContract.address &&
@@ -211,13 +214,19 @@ const Button: React.FC<ButtonProps> = ({ data, price, id, fetchData }) => {
     <React.Fragment>
       <div style={{ display: "flex" }}>
         <ButtonBuy
-          className={!isAllow ? "bcoin-btn disable" : "bcoin-btn"}
+          className="bcoin-btn"
+          disabled={!isAllow}
+          type="button"
+          aria-label="Buy Hero"
           onClick={() => onClick(data)}
         >
           Buy
         </ButtonBuy>
         <ButtonBuy
-          className={isInCart(id) ? "bcoin-btn disable" : "bcoin-btn"}
+          className="bcoin-btn"
+          disabled={isInCart(id)}
+          type="button"
+          aria-label={isInCart(id) ? "Item added to cart" : "Add to cart"}
           style={{
             marginLeft: "10px",
             backgroundColor: isInCart(id) ? "transparent" : "#3f4564",
