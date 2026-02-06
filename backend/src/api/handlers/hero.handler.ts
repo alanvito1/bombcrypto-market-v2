@@ -1,6 +1,7 @@
 import {Request, Response} from 'express';
 import {IHeroTransactionRepository} from '@/domain/interfaces/repository';
 import {createEmptyHeroTxFilterContext, HeroTxFilterContext} from '@/domain/models/hero';
+import {MAX_PAGE_SIZE} from '@/domain/models/pagination';
 import {generateCacheKeyFromData, ICache} from '@/infrastructure/cache/memory-cache';
 import {SearchIdTracker} from '@/infrastructure/redis/client';
 import {BlockChainCenterApi} from '@/infrastructure/blockchain/blockchain-center-api';
@@ -84,7 +85,7 @@ function parseHeroFilterContext(query: Request['query']): HeroTxFilterContext {
 
     // Pagination
     ctx.page = parseNumberParam(query.page, 1);
-    ctx.size = parseNumberParam(query.size, 20);
+    ctx.size = Math.min(parseNumberParam(query.size, 20), MAX_PAGE_SIZE);
 
     // Order by - format: direction:column (e.g., desc:block_timestamp)
     const orderBy = parseArrayParam(query.order_by);

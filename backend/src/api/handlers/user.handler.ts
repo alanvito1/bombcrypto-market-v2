@@ -1,6 +1,7 @@
 import {Request, Response} from 'express';
 import {IWalletHistoryRepository} from '@/domain/interfaces/repository';
 import {createEmptyWalletTxFilterContext, UserDetailsReq, UserRepr} from '@/domain/models/user';
+import {MAX_PAGE_SIZE} from '@/domain/models/pagination';
 import {parseHeroDetails, parseHouseDetails} from '@/utils/details-parser';
 import {generateCacheKeyFromData, ICache} from '@/infrastructure/cache/memory-cache';
 import {Logger} from '@/utils/logger';
@@ -86,7 +87,7 @@ export function createGetHistoryHandler(deps: UserHandlerDeps) {
         if (size && typeof size === 'string') {
             const parsed = parseInt(size, 10);
             if (!isNaN(parsed) && parsed > 0) {
-                filterContext.size = parsed;
+                filterContext.size = Math.min(parsed, MAX_PAGE_SIZE);
             }
         }
 
