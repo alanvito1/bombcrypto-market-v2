@@ -140,7 +140,6 @@ contract BHouseMarket is
 
         // save order info
         Order memory order = Order(
-            _tokenId,
             _price,
             _tokenDetails,
             msg.sender,
