@@ -265,6 +265,15 @@ export class HeroTransactionRepository implements IHeroTransactionRepository {
         await this.db.query(sql, [tokenId]);
     }
 
+    async updatePrice(tokenId: string, newPrice: string, blockTimestamp: Date): Promise<void> {
+        const sql = `
+            UPDATE hero_orders
+            SET amount = $2, updated_at = $3
+            WHERE token_id = $1 AND status = 'listing' AND deleted = false
+        `;
+        await this.db.query(sql, [tokenId, newPrice, blockTimestamp]);
+    }
+
     async countOrders(orderType: string, windowHours: number): Promise<number> {
         const sql = `
       SELECT COUNT(*)::int as count

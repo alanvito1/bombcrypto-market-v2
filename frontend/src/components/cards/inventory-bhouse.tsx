@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { Tag } from "../common/style";
 import SellModal from "../modal/sell";
+import UpdatePriceModal from "../modal/update-price";
 import SellSuccess from "../modal/sell-success";
 import SellFail from "../modal/sell-fail";
 import Cancel from "../modal/cancel";
@@ -135,9 +136,18 @@ const BHeroFullWidth: React.FC<InventoryBhouseProps> = ({
               <span>{bcoinFormat(data.amount)}</span>
               <div className="toolip">{bcoinFormat(data.amount)}</div>
             </div>
-            <button onClick={confirm} className="cancel">
-              Cancel selling
-            </button>
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px", alignItems: "flex-end" }}>
+              <button onClick={confirm} className="cancel">
+                Cancel selling
+              </button>
+              <button
+                onClick={() => { setStatus("update-price"); toggle(); }}
+                className="approve"
+                style={{ padding: "0.5rem 1rem", fontSize: "1rem", width: "auto" }}
+              >
+                Update Price
+              </button>
+            </div>
           </React.Fragment>
         )}
         {!cancel && isApprove && (
@@ -161,6 +171,16 @@ const BHeroFullWidth: React.FC<InventoryBhouseProps> = ({
           isShowing={isShowing}
         />
       )}
+      {status === "update-price" && (
+        <UpdatePriceModal
+          setStatus={updateStatus}
+          data={{ ...data, id: data.id || data.token_id || 0 }}
+          hide={toggle}
+          minPrice={minPrice}
+          name={"BHouse"}
+          isShowing={isShowing}
+        />
+      )}
       {status === "success" && (
         <SellSuccess
           data={data}
@@ -168,6 +188,16 @@ const BHeroFullWidth: React.FC<InventoryBhouseProps> = ({
           minPrice={minPrice}
           reload={clear.current}
           title="Bhouse"
+          isShowing={isShowing}
+        />
+      )}
+      {status === "update-success" && (
+        <Success
+          id={data.token_id || data.ref_id || data.id}
+          hide={toggle}
+          message={"Successfully updated price"}
+          title="Update Price"
+          reload={clear.current}
           isShowing={isShowing}
         />
       )}

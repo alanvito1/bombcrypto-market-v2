@@ -14,6 +14,7 @@ import {
     CreateOrderEvent,
     EventParser,
     SoldEvent,
+    OrderPriceUpdatedEvent,
 } from '@/infrastructure/blockchain/events/parser';
 import {HouseTxReq} from '@/domain/models/house';
 import {TX_STATUS} from '@/domain/models/hero';
@@ -102,6 +103,9 @@ export class HouseSubscriber extends BaseSubscriber {
             case 'CancelOrder':
                 await this.handleCancelOrder(event);
                 break;
+            case 'OrderPriceUpdated':
+                await this.handleUpdatePrice(event);
+                break;
         }
     }
 
@@ -189,6 +193,27 @@ export class HouseSubscriber extends BaseSubscriber {
 
         this.logger.info('HouseSubscriber processed CancelOrder', {
             tokenId: event.tokenId.toString(),
+        });
+    }
+
+    /**
+     * Handle OrderPriceUpdated event
+     */
+    private async handleUpdatePrice(event: OrderPriceUpdatedEvent): Promise<void> {
+        const timestamp = await this.client.getBlockTimestamp(event.blockNumber);
+        if (timestamp === null) {
+            throw new Error(`Block ${event.blockNumber} not found`);
+        }
+
+        await this.houseRepo.updatePrice(
+            event.tokenId.toString(),
+            event.newPrice.toString(),
+            new Date(timestamp * 1000)
+        );
+
+        this.logger.info('HouseSubscriber processed OrderPriceUpdated', {
+            tokenId: event.tokenId.toString(),
+            newPrice: event.newPrice.toString(),
         });
     }
 
