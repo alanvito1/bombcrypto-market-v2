@@ -1,6 +1,8 @@
 import React from "react";
 import styled from "styled-components";
 import BhouseCard from "../cards/market-bhouse";
+import EmptyState from "../common/empty-state";
+import SearchIcon from "../icons/search";
 
 interface HouseData {
   id: string | number;
@@ -20,7 +22,7 @@ const Bhouse: React.FC<MarketBhouseListProps> = ({ data }) => {
   return (
     <Wrap>
       {data && data.length === 0 && (
-        <div className="right-title">Bhouse not found</div>
+        <EmptyState message="No houses found" icon={<SearchIcon />} />
       )}
       <List>
         {data &&

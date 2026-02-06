@@ -2,6 +2,8 @@ import React from "react";
 import styled from "styled-components";
 import BHeroCard from "../cards/market-bhero-card";
 import BHeroCardHorizonal from "../cards/market-bhero-list";
+import EmptyState from "../common/empty-state";
+import SearchIcon from "../icons/search";
 
 interface HeroData {
   id: string | number;
@@ -33,7 +35,7 @@ const Statistics: React.FC<MarketBheroListProps> = ({ view, data, network }) => 
   return (
     <Wrap>
       {data && data.length === 0 && (
-        <div className="right-title">Bhero not found</div>
+        <EmptyState message="No heroes found" icon={<SearchIcon />} />
       )}
       <List>
         {data &&
