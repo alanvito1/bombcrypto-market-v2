@@ -4,8 +4,11 @@ import { NavLink } from "react-router-dom";
 import { ContainerFull } from "../../common/style";
 import ConnectWallet from "../../buttons/ConnectWallet";
 import logo from "../../../assets/images/logo.png";
+import { useCart } from "../../../context/cart";
+import CartDrawer from "../../cart/CartDrawer";
 
 const HeaderComp: React.FC = () => {
+  const { toggleCart, cartItems } = useCart();
   return (
     <Header>
       <ContainerFull>
@@ -30,9 +33,13 @@ const HeaderComp: React.FC = () => {
           </NavLink>
         </Nav>
         <SpaceRight>
+          <CartButton onClick={toggleCart}>
+             CART <span>{cartItems.length}</span>
+          </CartButton>
           <ConnectWallet />
         </SpaceRight>
       </ContainerFull>
+      <CartDrawer />
     </Header>
   );
 };
@@ -105,6 +112,25 @@ const SpaceRight = styled.div`
   display: flex;
   justify-content: flex-end;
   padding-right: ${({ theme }) => theme.spacing.md};
+`;
+
+const CartButton = styled.div`
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  margin-right: 20px;
+  color: ${({ theme }) => theme.colors.text};
+  font-weight: bold;
+  font-size: 1.2rem;
+
+  span {
+      background: ${({ theme }) => theme.colors.primary};
+      color: #fff;
+      border-radius: 12px;
+      padding: 0 8px;
+      margin-left: 8px;
+      font-size: 0.9rem;
+  }
 `;
 
 export default HeaderComp;
