@@ -325,6 +325,25 @@ export class HouseTransactionRepository implements IHouseTransactionRepository {
             .from('house_orders');
 
         this.applyFilterConditions(qb, context);
+
+        // Security: Whitelist orderBy columns to prevent SQL injection
+        const validSortColumns = [
+            'id',
+            'updated_at',
+            'block_number',
+            'block_timestamp',
+            'amount',
+            'rarity',
+            'token_id',
+            'recovery',
+            'capacity',
+            'pay_token',
+        ];
+
+        if (!validSortColumns.includes(context.orderBy)) {
+            context.orderBy = 'updated_at';
+        }
+
         qb.paginate(context);
 
         return qb;
