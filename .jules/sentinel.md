@@ -17,3 +17,8 @@
 **Vulnerability:** Found SQL injection risk in `whereOr` method of custom QueryBuilder which accepted raw string conditions without parameter support, leading to potential injection in `HeroTransactionRepository`.
 **Learning:** Custom ORM/QueryBuilders often miss edge cases like complex `OR` conditions with parameters. Always verify if helper methods support parameterization.
 **Prevention:** Extended `whereOr` to accept values and handle `0` placeholders for safe parameter injection.
+
+## 2026-02-19 - Missing CORS Configuration
+**Vulnerability:** The backend API lacked explicit CORS configuration, potentially allowing `helmet` defaults or proxy configurations to be the only line of defense.
+**Learning:** Monorepo setups with local proxies often mask the need for strict CORS on the backend itself. However, when deployed or accessed directly, the API remains exposed.
+**Prevention:** Implemented `cors` middleware with configurable `CORS_ORIGIN` support to enforce strict origin validation at the application level.

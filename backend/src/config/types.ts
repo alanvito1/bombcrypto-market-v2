@@ -12,6 +12,7 @@ export const serverConfigSchema = z.object({
     isProduction: z.boolean().default(false),
     redisUrl: z.string().default(''),
     network: z.string().default('bsc'),
+    corsOrigin: z.string().default('*'),
 });
 
 // Subscriber configuration schema

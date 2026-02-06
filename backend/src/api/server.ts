@@ -1,5 +1,6 @@
 import express, {Application, Request, Response} from 'express';
 import helmet from 'helmet';
+import cors from 'cors';
 import {Server as HttpServer} from 'http';
 
 import {Config} from '@/config/types';
@@ -125,6 +126,11 @@ export class ApiServer {
     private setupMiddleware(): void {
         // Security headers
         this.app.use(helmet());
+
+        // CORS
+        this.app.use(cors({
+            origin: this.deps.config.server.corsOrigin,
+        }));
 
         // Rate limiting: 100 requests per 10 seconds per IP + endpoint
         this.app.use(createRateLimiter(10000, 100));
