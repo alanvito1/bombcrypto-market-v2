@@ -11,6 +11,9 @@ import DetailHouse from "./views/market/bhouse-id";
 import NotificationProvider from "./context/notification";
 import { AnimatePresence } from "framer-motion";
 import AnimationLoad from "./components/common/animation";
+import { ThemeProvider } from "styled-components";
+import { theme } from "./styles/theme";
+import { GlobalStyles } from "./styles/GlobalStyles";
 import {
   BrowserRouter as Router,
   Switch,
@@ -24,7 +27,8 @@ import "./App.css";
 
 function App(): JSX.Element {
   return (
-    <React.Fragment>
+    <ThemeProvider theme={theme}>
+      <GlobalStyles />
       <NotificationProvider>
         <AccountProvider>
           <SmartContract>
@@ -38,7 +42,7 @@ function App(): JSX.Element {
           </SmartContract>
         </AccountProvider>
       </NotificationProvider>
-    </React.Fragment>
+    </ThemeProvider>
   );
 }
 

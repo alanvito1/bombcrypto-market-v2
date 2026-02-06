@@ -64,7 +64,6 @@ let unount = false;
 interface SortOption {
   label: string;
   value: string;
-  // TODO: Add strict typing for sort direction
 }
 
 const sortby: SortOption[] = [
@@ -103,25 +102,12 @@ interface ListItem {
   [key: string]: unknown;
 }
 
-/**
- * Statistics Component (Marketplace View)
- *
- * Main view for searching and filtering hero listings.
- * Manages URL query parameters to persist filter state.
- *
- * Features:
- * - Filtering by Rarity, Stats, Ability, Token ID.
- * - Sorting by Price, Time, Stats.
- * - Pagination.
- * - Auto-refresh (polling) of listings.
- */
 const Statistics: React.FC = () => {
   const { updateClear, network } = useAccount();
   const location = useLocation();
   const history = useHistory();
   const { getListTokenPay } = useGetTokenPayList();
 
-  // Initialize state from URL query parameters
   const init = useMemo(() => {
     const defaultQuery = convertQueryToObject(location.search);
     const init: ParamsState = {
@@ -136,7 +122,6 @@ const Statistics: React.FC = () => {
   const [params, setParams] = useState<ParamsState>(init);
   const [view, setView] = useState("list");
   const [data, setData] = useState<ListItem[] | null>(null);
-  //const [dataShield, setDataShield] = useState([]);
   const [preHeroS, setPreHeroS] = useState<number[]>([]);
   const payload = useRef<ParamsState>();
 
@@ -159,13 +144,6 @@ const Statistics: React.FC = () => {
     { id: 1, label: "Max", key: "lte" },
   ];
 
-  /**
-   * Debounced handler for input changes.
-   * Updates params state and triggers fetch.
-   *
-   * @param {string} name - The filter field name.
-   * @param {unknown} value - The new value.
-   */
   const onChange = debounce((name: string, value: unknown) => {
     if (params[name] === params.page) return;
     setData(null);
@@ -177,24 +155,11 @@ const Statistics: React.FC = () => {
     fetch(params);
   }, 1000);
 
-  /**
-   * Fetches hero listings from the backend API.
-   *
-   * Logic:
-   * 1. Converts params to query string.
-   * 2. Updates browser URL (history.replace).
-   * 3. Calls GET /transactions/heroes/search.
-   * 4. Enriches data with payment token info.
-   * 5. Sets state and schedules next poll.
-   *
-   * @param {ParamsState} params - The current filter parameters.
-   */
   const fetch = async (params: ParamsState) => {
     if (unount) return;
     const result = convertFilter(params);
     history.replace(location.pathname + "?" + result);
     try {
-      // Direct API call - should be refactored to a service layer
       const listing = await axios.get(
         getAPI(network) + "transactions/heroes/search?status=listing&" + result
       );
@@ -230,7 +195,7 @@ const Statistics: React.FC = () => {
     if (timmer) clearTimeout(timmer);
     timmer = setTimeout(() => {
       fetch(params);
-    }, 60000); // Poll every 60s
+    }, 60000);
   };
 
   const onChangeSelect = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -246,28 +211,6 @@ const Statistics: React.FC = () => {
     fetch(params);
   };
 
-  useEffect(() => {
-    if (preHeroS.length !== 0) {
-      // FIXME: nhanc18 check sau
-      // fetchShieldData(preHeroS);
-    }
-  }, [preHeroS.length && preHeroS[0]]);
-
-  // const fetchShieldData = async (data) => {
-  //   const resp = await axios.post("https://api-test.bombcrypto.io/shield", {
-  //     headers: {
-  //       "Access-Control-Allow-Origin": true,
-  //       accept: "application/json",
-  //     },
-  //     ids: data,
-  //   });
-  //   if (resp.data?.message) {
-  //     setDataShield(resp.data?.message);
-  //   } else {
-  //     setDataShield([]);
-  //   }
-  //   return resp;
-  // };
   useEffect(() => {
     unount = false;
     fetch(params);
@@ -285,16 +228,17 @@ const Statistics: React.FC = () => {
       <TabTitle>
         {tabs.map((element) => (
           <Element activeClassName="active" key={element.label} to={element.to}>
-            <img src={element.icon} alt="" />
+            <img src={element.icon} alt={element.label + " Icon"} />
             {element.label}
           </Element>
         ))}
         <Option>
-          <Search onChange={onChange} name="token_id" />
+          <Search onChange={onChange} name="token_id" aria-label="Search Token ID" />
           <div className="select">
             <select
-              name=""
-              id=""
+              name="order_by"
+              id="order_by_select"
+              aria-label="Sort by"
               onChange={onChangeSelect}
               defaultChecked={sortby[0] as unknown as boolean}
             >
@@ -309,6 +253,14 @@ const Statistics: React.FC = () => {
             <div
               className={view === element.value ? "item active" : "item"}
               key={element.value}
+              role="button"
+              tabIndex={0}
+              aria-label={`Switch to ${element.value} view`}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  setView(element.value);
+                }
+              }}
               onClick={() => {
                 setView(element.value);
               }}
@@ -437,16 +389,16 @@ const Statistics: React.FC = () => {
 const Element = styled(NavLink)`
   padding: 1rem 1.875rem;
   font-size: 2rem;
-  color: #fff;
+  color: ${({ theme }) => theme.colors.text};
   display: flex;
   align-items: center;
   opacity: 0.3;
   cursor: pointer;
   transition: opacity 0.3s ease-in-out;
-  font-family: "agency-fb-regular", sans-serif;
+  font-family: ${({ theme }) => theme.fonts.primary};
   transition: 0.3s ease-in-out;
   &:hover {
-    color: white !important;
+    color: ${({ theme }) => theme.colors.text} !important;
     opacity: 1;
   }
 
@@ -463,7 +415,7 @@ const Element = styled(NavLink)`
       display: block;
       width: 100%;
       height: 0.375rem;
-      background-color: #ff973a;
+      background-color: ${({ theme }) => theme.colors.primary};
       position: absolute;
       bottom: 0;
       left: 0;
@@ -478,7 +430,7 @@ const Option = styled.div`
   padding-right: 1.5rem;
   .select {
     padding-right: 1rem;
-    background: #3a3f54;
+    background: ${({ theme }) => theme.colors.surfaceLighter};
     margin: 0px 6px;
     cursor: pointer;
     transition: background 0.3s ease-in-out;
@@ -486,18 +438,18 @@ const Option = styled.div`
     select {
       height: 2.625rem;
       padding: 0 1.625rem;
-      background: #3a3f54;
+      background: ${({ theme }) => theme.colors.surfaceLighter};
       border: none;
-      color: white;
+      color: ${({ theme }) => theme.colors.text};
       transition: background 0.3s ease-in-out;
       &:focus {
         outline: none;
       }
     }
     &:hover {
-      background: #131e4b;
+      background: ${({ theme }) => theme.colors.background};
       select {
-        background: #131e4b;
+        background: ${({ theme }) => theme.colors.background};
       }
     }
   }
@@ -509,16 +461,19 @@ const Option = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #3a3f54;
+    background: ${({ theme }) => theme.colors.surfaceLighter};
     margin: 0px 6px;
     cursor: pointer;
     transition: background 0.3s ease-in-out;
     svg {
-      fill: white;
+      fill: ${({ theme }) => theme.colors.text};
     }
     &:hover,
     &.active {
-      background: #131e4b;
+      background: ${({ theme }) => theme.colors.background};
+    }
+    &:focus {
+       outline: 2px solid ${({ theme }) => theme.colors.primary};
     }
   }
 `;
@@ -527,6 +482,12 @@ const ContentTab = styled.div`
   width: 100%;
   border-top: none;
   display: flex;
+  flex-direction: column;
+
+  @media (min-width: ${({ theme }) => theme.breakpoints.tablet}) {
+    flex-direction: row;
+  }
+
   .loading-in-local {
     & > div {
       min-height: 65.438rem;
@@ -534,29 +495,34 @@ const ContentTab = styled.div`
   }
 
   .left {
-    flex: 0 0 23rem;
-    width: 23rem;
-    height: calc(115vh);
-    border-right: 1px solid #3f445b;
+    width: 100%; // Mobile first
     padding: 2rem 1.375rem;
-    position: sticky;
-    top: 0;
-    @media (max-width: 1440px) {
+    position: relative;
+    border-right: none;
+    border-bottom: 1px solid ${({ theme }) => theme.colors.border};
+
+    @media (min-width: ${({ theme }) => theme.breakpoints.tablet}) {
       flex: 0 0 23rem;
       width: 23rem;
+      height: calc(115vh);
+      border-right: 1px solid ${({ theme }) => theme.colors.border};
+      border-bottom: none;
+      position: sticky;
+      top: 0;
     }
+
     .title {
-      color: #7680ab;
+      color: ${({ theme }) => theme.colors.secondary};
       margin: 1.063rem 0rem;
       font-size: 1.594rem;
-      font-family: "agency-fb-regular", sans-serif;
+      font-family: ${({ theme }) => theme.fonts.primary};
     }
     .level {
       display: flex;
       & > span {
         margin-right: 1rem;
         font-size: 1rem;
-        color: white;
+        color: ${({ theme }) => theme.colors.text};
         transform: translateY(-10px);
       }
       & > div {
@@ -568,9 +534,9 @@ const ContentTab = styled.div`
     padding: 1.688rem 1.25rem;
     flex: 1;
     .right-title {
-      font-family: "agency-fb-regular", sans-serif;
+      font-family: ${({ theme }) => theme.fonts.primary};
       font-size: 2.031rem;
-      color: #fff;
+      color: ${({ theme }) => theme.colors.text};
       margin-bottom: 1.563rem;
     }
   }
@@ -580,7 +546,8 @@ const TabTitle = styled.div`
   display: flex;
   width: 100%;
   overflow: hidden;
-  border-bottom: 1px solid #3f445b;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.border};
+  flex-wrap: wrap; // Allow wrapping on small screens
 `;
 
 const Recently = styled.div`
