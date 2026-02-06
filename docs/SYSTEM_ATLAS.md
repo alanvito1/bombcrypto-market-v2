@@ -57,6 +57,15 @@ classDiagram
 
 ## 📦 Inventory
 
+### 🎨 Frontend Design System (Vibe)
+
+| Component | Location | Description |
+|---|---|---|
+| **Theme Tokens** | `frontend/src/styles/theme.ts` | Centralized definition for Colors, Spacing, Breakpoints, and Fonts. |
+| **Global Styles** | `frontend/src/styles/GlobalStyles.ts` | CSS Reset and global typography/background settings. |
+| **Header** | `frontend/src/components/layouts/Header` | Responsive navigation bar with mobile support. |
+| **Market Statistics** | `frontend/src/views/market.tsx` | Main market listing view, refactored for responsiveness and accessibility. |
+
 ### 🔌 API Endpoints (Backend)
 
 | Method | Endpoint | Handler | Responsibility |
