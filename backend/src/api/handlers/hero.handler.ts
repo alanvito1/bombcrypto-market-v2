@@ -84,9 +84,11 @@ function parseHeroFilterContext(query: Request['query']): HeroTxFilterContext {
     ctx.payToken = parseArrayParam(query.pay_token);
 
     // Number array filters
-    ctx.tokenId = parseNumberArrayParam(query.token_id);
     ctx.rarity = parseNumberArrayParam(query.rarity);
     ctx.abilities = parseNumberArrayParam(query.ability);
+
+    // String array filters
+    ctx.tokenId = parseArrayParam(query.token_id);
     ctx.abilitiesHeroS = parseNumberArrayParam(query.s_ability);
 
     // RHS format filters (e.g., level=gte:20)
@@ -198,7 +200,7 @@ export function createBurnHandler(deps: HeroHandlerDeps) {
         }
 
         // Delete all create orders for this token
-        await deps.heroTxRepo.deleteAllCreateOrders(Number(tokenId));
+        await deps.heroTxRepo.deleteAllCreateOrders(tokenId.toString());
 
         res.status(200).send();
     });

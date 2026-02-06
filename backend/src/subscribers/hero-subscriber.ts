@@ -125,7 +125,7 @@ export class HeroSubscriber extends BaseSubscriber {
             buyerWalletAddress: '',
             heroDetails: event.tokenDetail.toString(),
             amount: event.price.toString(),
-            tokenId: Number(event.tokenId),
+            tokenId: event.tokenId.toString(),
             payToken,
         };
 
@@ -159,7 +159,7 @@ export class HeroSubscriber extends BaseSubscriber {
             buyerWalletAddress: event.buyer,
             heroDetails: event.tokenDetail.toString(),
             amount: event.price.toString(),
-            tokenId: Number(event.tokenId),
+            tokenId: event.tokenId.toString(),
             payToken,
         };
 
@@ -184,7 +184,7 @@ export class HeroSubscriber extends BaseSubscriber {
      * Handle CancelOrder event - delete listing
      */
     private async handleCancelOrder(event: CancelOrderEvent): Promise<void> {
-        await this.heroRepo.deleteAllCreateOrders(Number(event.tokenId));
+        await this.heroRepo.deleteAllCreateOrders(event.tokenId.toString());
 
         this.logger.info('HeroSubscriber processed CancelOrder', {
             tokenId: event.tokenId.toString(),
