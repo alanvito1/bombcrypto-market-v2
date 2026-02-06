@@ -41,6 +41,7 @@ export function loadConfig(): Config {
             isProduction: getEnvBool('IS_PROD', false),
             redisUrl,
             network,
+            corsOrigin: getEnv('CORS_ORIGIN', '*'),
         },
         subscriber: {
             blockchainCenterApiUrl,
