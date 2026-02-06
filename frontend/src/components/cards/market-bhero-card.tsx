@@ -4,6 +4,7 @@ import { Tag } from "../common/style";
 import { mapRarity, bcoinFormat, mapTag } from "../../utils/helper";
 import { HeroIcon } from "../hero";
 import { IMAGE_TOKEN_SHOW } from "../../utils/config";
+import { useHistory } from "react-router-dom";
 
 interface HeroData {
   token_id: string | number;
@@ -16,11 +17,31 @@ interface HeroData {
 
 interface BHeroCardProps {
   data: HeroData;
+  network?: string;
 }
 
 const BHeroFullWidth: React.FC<BHeroCardProps> = ({ data }) => {
+  const history = useHistory();
+
+  const handleNavigate = () => {
+    history.push(`/market/bhero/${data.token_id}`);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      handleNavigate();
+    }
+  };
+
   return (
-    <Item>
+    <Item
+      onClick={handleNavigate}
+      role="button"
+      tabIndex={0}
+      aria-label={`View details for BHero #${data.token_id}`}
+      onKeyDown={handleKeyDown}
+    >
       <div className="header">
         <Tag>#{data.token_id}</Tag>
         <Tag className={mapTag[data.rarity]}>{mapRarity(data.rarity)}</Tag>
@@ -47,8 +68,13 @@ const Item = styled.div`
   padding: 0.563rem 0.438rem;
   cursor: pointer;
   transition: background 0.3s ease-in-out;
-  &:hover {
+  &:hover, &:focus-visible {
     background: #000000;
+    outline: none;
+  }
+  &:focus-visible {
+    border-color: #ff973a;
+    box-shadow: 0 0 0 1px #ff973a;
   }
   .header {
     display: flex;

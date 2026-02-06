@@ -9,3 +9,7 @@
 ## 2024-05-25 - UX Pattern: Meaningful Empty States
 **Learning:** The application relied on minimal text strings (e.g., "Bhero not found") for empty states, which are easy to miss and provide no guidance or visual feedback.
 **Action:** Implemented a reusable `EmptyState` component with `role="status"` and a visual icon. Future list components should always import and use this component instead of raw text when data length is 0.
+
+## 2024-05-26 - UX Pattern: Ghost Features
+**Learning:** Found a fully implemented "Card View" feature that was unreachable because the UI toggle was missing from the view configuration array.
+**Action:** When auditing views, verify that all imported components and features are actually accessible in the UI. Re-enabling these features can provide quick UX wins.
