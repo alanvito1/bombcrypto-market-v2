@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import styled from "styled-components";
-import { List } from "../components/icons/index";
+import { List, Card } from "../components/icons/index";
 import Chart from "../components/icons/chart";
 import PulseDashboard from "../components/dashboard/PulseDashboard";
 import Slider from "../components/forms/range";
@@ -53,6 +53,10 @@ interface ViewComp {
 }
 
 const comp: ViewComp[] = [
+  {
+    value: "card",
+    icon: <Card />,
+  },
   {
     value: "list",
     icon: <List />,
