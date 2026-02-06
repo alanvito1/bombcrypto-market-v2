@@ -64,6 +64,7 @@ let unount = false;
 interface SortOption {
   label: string;
   value: string;
+  // TODO: Add strict typing for sort direction
 }
 
 const sortby: SortOption[] = [
@@ -102,12 +103,25 @@ interface ListItem {
   [key: string]: unknown;
 }
 
+/**
+ * Statistics Component (Marketplace View)
+ *
+ * Main view for searching and filtering hero listings.
+ * Manages URL query parameters to persist filter state.
+ *
+ * Features:
+ * - Filtering by Rarity, Stats, Ability, Token ID.
+ * - Sorting by Price, Time, Stats.
+ * - Pagination.
+ * - Auto-refresh (polling) of listings.
+ */
 const Statistics: React.FC = () => {
   const { updateClear, network } = useAccount();
   const location = useLocation();
   const history = useHistory();
   const { getListTokenPay } = useGetTokenPayList();
 
+  // Initialize state from URL query parameters
   const init = useMemo(() => {
     const defaultQuery = convertQueryToObject(location.search);
     const init: ParamsState = {
@@ -145,6 +159,13 @@ const Statistics: React.FC = () => {
     { id: 1, label: "Max", key: "lte" },
   ];
 
+  /**
+   * Debounced handler for input changes.
+   * Updates params state and triggers fetch.
+   *
+   * @param {string} name - The filter field name.
+   * @param {unknown} value - The new value.
+   */
   const onChange = debounce((name: string, value: unknown) => {
     if (params[name] === params.page) return;
     setData(null);
@@ -156,11 +177,24 @@ const Statistics: React.FC = () => {
     fetch(params);
   }, 1000);
 
+  /**
+   * Fetches hero listings from the backend API.
+   *
+   * Logic:
+   * 1. Converts params to query string.
+   * 2. Updates browser URL (history.replace).
+   * 3. Calls GET /transactions/heroes/search.
+   * 4. Enriches data with payment token info.
+   * 5. Sets state and schedules next poll.
+   *
+   * @param {ParamsState} params - The current filter parameters.
+   */
   const fetch = async (params: ParamsState) => {
     if (unount) return;
     const result = convertFilter(params);
     history.replace(location.pathname + "?" + result);
     try {
+      // Direct API call - should be refactored to a service layer
       const listing = await axios.get(
         getAPI(network) + "transactions/heroes/search?status=listing&" + result
       );
@@ -196,7 +230,7 @@ const Statistics: React.FC = () => {
     if (timmer) clearTimeout(timmer);
     timmer = setTimeout(() => {
       fetch(params);
-    }, 60000);
+    }, 60000); // Poll every 60s
   };
 
   const onChangeSelect = (event: React.ChangeEvent<HTMLSelectElement>) => {

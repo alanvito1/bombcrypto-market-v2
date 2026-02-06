@@ -1,78 +1,96 @@
-# Bombcrypto Marketplace
+# 💣 Bombcrypto Marketplace
 
 ![License](https://img.shields.io/badge/License-AGPL_v3-blue.svg)
 ![Version](https://img.shields.io/badge/Version-1.0.0-green.svg)
 ![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen.svg)
+![Docs](https://img.shields.io/badge/Docs-Deep_Scribe-orange.svg)
 
 > **The official NFT marketplace for Bombcrypto Heroes and Houses.**
 > *Secure, fast, and multi-chain trading on BSC and Polygon.*
 
 ---
 
-## 📖 Documentation
+## 🏛️ Architecture Overview (C4 Context)
 
-The complete knowledge base for this project is located in the [`docs/`](docs/) directory.
+```mermaid
+C4Context
+    title System Context Diagram (Bombcrypto Marketplace)
 
-| Section | Description |
+    Person(player, "Player", "A user who owns Heroes/Houses")
+
+    System_Boundary(market_boundary, "Marketplace Ecosystem") {
+        System(webapp, "Web App", "React/Vite Frontend")
+        System(api, "Market API", "Node.js/Express Backend")
+        System(subscribers, "Event Subscribers", "Syncs Blockchain Events")
+        SystemDb(db, "Database", "PostgreSQL (Orders & Stats)")
+    }
+
+    System_Ext(blockchain, "Blockchain", "BSC / Polygon Smart Contracts")
+    System_Ext(wallet, "Wallet", "Metamask / WalletConnect")
+
+    Rel(player, webapp, "Browses, Buys, Sells")
+    Rel(player, wallet, "Signs Transactions")
+    Rel(webapp, api, "Fetches Listings & Stats")
+    Rel(webapp, blockchain, "Executes Smart Contract Calls")
+    Rel(wallet, blockchain, "Submits Signed Txs")
+    Rel(blockchain, subscribers, "Emits Events (CreateOrder, Sold)")
+    Rel(subscribers, db, "Writes Order Data")
+    Rel(api, db, "Reads Order Data")
+```
+
+---
+
+## 📖 Documentation Hub
+
+The complete knowledge base is maintained by **Deep Scribe**.
+
+| Artifact | Description |
 |---|---|
-| 🏗️ **[Architecture](docs/architecture/README.md)** | System Context, Container Diagrams, ERD, and Sequence Flows. |
-| 👩‍💻 **[Developer Guide](docs/manuals/developer-guide.md)** | Setup instructions, running locally, and environment variables. |
-| 🔌 **[API Reference](docs/manuals/api-reference.md)** | Detailed API endpoints and usage. |
-| 📘 **[User Manual](docs/manuals/user-guide.md)** | How to buy, sell, and connect wallets. |
-| 🗺️ **[Roadmap](docs/history/ROADMAP.md)** | Current status and future plans. |
+| 🗺️ **[System Atlas](docs/SYSTEM_ATLAS.md)** | **Master Inventory.** All endpoints, tables, and services. |
+| 🏗️ **[Architecture](docs/ARCHITECTURE.md)** | Sequence flows, ERD, and folder structure. |
+| 📓 **[Scribe's Journal](docs/SCRIBE_JOURNAL.md)** | Gap analysis, anomalies, and security notes. |
+| 🔌 **[API Reference](docs/manuals/api-reference.md)** | Detailed API endpoints. |
+| 👩‍💻 **[Developer Guide](docs/manuals/developer-guide.md)** | Setup and contribution. |
 
 ---
 
 ## 🚀 Quick Start
 
 ### Prerequisites
--   Node.js v18+
--   PostgreSQL
--   Redis
+*   Node.js v18+
+*   PostgreSQL
+*   Redis
+*   `pnpm` (Strictly enforced)
 
-### One-Liner (Docker)
-*Coming soon - see Developer Guide for local setup.*
+### Local Development
 
-### Manual Setup
-```bash
-# Clone the repo
-git clone <repo-url>
-cd market
+1.  **Clone & Install**
+    ```bash
+    git clone <repo>
+    cd market
+    pnpm install # Root dependencies
+    ```
 
-# Install Backend
-cd backend && npm install
+2.  **Start Backend**
+    ```bash
+    cd backend
+    pnpm install
+    # Setup .env (see Developer Guide)
+    pnpm dev:api:bsc
+    ```
 
-# Install Frontend
-cd ../frontend && npm install
-```
-
-For detailed instructions on running the API, Subscribers, and Frontend, please consult the **[Developer Guide](docs/manuals/developer-guide.md)**.
-
----
-
-## 🏛️ Architecture Overview
-
-The marketplace is built using a microservices-like architecture:
-
-```mermaid
-C4Context
-    title System Context
-
-    Person(user, "User", "Bombcrypto Player")
-    System(market, "Marketplace", "Web UI + API")
-    System_Ext(blockchain, "Blockchain", "BSC / Polygon")
-
-    Rel(user, market, "Uses")
-    Rel(market, blockchain, "Syncs Events")
-```
-
-See the **[full architecture documentation](docs/architecture/README.md)** for detailed C4 diagrams.
+3.  **Start Frontend**
+    ```bash
+    cd frontend
+    pnpm install
+    pnpm dev
+    ```
 
 ---
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see **[CONTRIBUTING.md](CONTRIBUTING.md)** for details on our code of conduct and the process for submitting pull requests.
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests.
 
 ## 📄 License
 
