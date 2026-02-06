@@ -161,6 +161,16 @@ contract BHeroMarket is
         _buy(_tokenId, _price);
     }
 
+    // @dev Batch Buy on active orders
+    // @param _tokenIds - IDs of nfts.
+    // @param _prices - prices of the NFTs.
+    function batchBuy(uint256[] calldata _tokenIds, uint256[] calldata _prices) external whenNotPaused {
+        require(_tokenIds.length == _prices.length, "Input lengths must match");
+        for (uint256 i = 0; i < _tokenIds.length; i++) {
+            _buy(_tokenIds[i], _prices[i]);
+        }
+    }
+
     // @dev Cancels an order that hasn't been won yet.
     //  Returns the NFT to original owner.
     // @notice This is a state-modifying function that can

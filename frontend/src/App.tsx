@@ -5,6 +5,7 @@ import MarketBHouse from "./views/market-bhouse";
 import Header from "./components/layouts/Header/index";
 import SmartContract from "./context/smc";
 import AccountProvider, { useAccount } from "./context/account";
+import { CartProvider } from "./context/cart";
 import Account from "./views/account";
 import DetailHero from "./views/market/bhero-id";
 import DetailHouse from "./views/market/bhouse-id";
@@ -32,13 +33,15 @@ function App(): JSX.Element {
       <NotificationProvider>
         <AccountProvider>
           <SmartContract>
-            <Router>
-              <Header />
-              <div style={{ padding: 10 }}></div>
-              <AnimatePresence>
-                <ContentRouter />
-              </AnimatePresence>
-            </Router>
+            <CartProvider>
+              <Router>
+                <Header />
+                <div style={{ padding: 10 }}></div>
+                <AnimatePresence>
+                  <ContentRouter />
+                </AnimatePresence>
+              </Router>
+            </CartProvider>
           </SmartContract>
         </AccountProvider>
       </NotificationProvider>
