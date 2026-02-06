@@ -27,7 +27,6 @@ abstract contract MarketCore {
 
     // Represents an order
     struct Order {
-        uint256 tokenId;
         // Listing price
         uint256 price;
         // item Details
