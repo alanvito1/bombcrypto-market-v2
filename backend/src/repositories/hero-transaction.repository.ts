@@ -532,11 +532,15 @@ export class HeroTransactionRepository implements IHeroTransactionRepository {
 
         // Hero S abilities filter (stored as string, use LIKE or equality)
         if (context.abilitiesHeroS.length > 0) {
-            // For Hero S abilities, we check if they exist in the abilities_hero_s string
-            const orConditions = context.abilitiesHeroS.map(
-                ability => `abilities_hero_s LIKE '%${ability}%'`
-            );
-            qb.whereOr(orConditions);
+            const orConditions: string[] = [];
+            const values: unknown[] = [];
+
+            context.abilitiesHeroS.forEach((ability) => {
+                orConditions.push(`abilities_hero_s LIKE $?`);
+                values.push(`%${ability}%`);
+            });
+
+            qb.whereOr(orConditions, values);
         }
     }
 
