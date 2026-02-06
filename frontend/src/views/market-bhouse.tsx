@@ -141,7 +141,12 @@ const Statistics: React.FC = () => {
         total_pages,
         size,
       }));
-    } catch (error) {}
+    } catch (error) {
+      console.error(error);
+      if (data === null) {
+        setData([]);
+      }
+    }
 
     if (timmer) clearTimeout(timmer);
     timmer = setTimeout(() => {
