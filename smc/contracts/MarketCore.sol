@@ -28,14 +28,15 @@ abstract contract MarketCore {
     // Represents an order
     struct Order {
         uint256 tokenId;
-        // Current owner of NFT
-        address seller;
         // Listing price
         uint256 price;
         // item Details
         uint256 tokenDetail;
+        // Current owner of NFT
+        address seller;
         // Time when order started
-        uint256 startedAt;
+        // GAS: Packed with seller to save 1 storage slot (20k gas)
+        uint64 startedAt;
     }
 
     IBEP20 public bcoinContract;
