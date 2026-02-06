@@ -12,3 +12,8 @@
 **Vulnerability:** The `HeroTransactionRepository` and `HouseTransactionRepository` directly interpolated the `orderBy` query parameter into the SQL string via a custom `QueryBuilder`, allowing SQL injection.
 **Learning:** Even with parameterized queries for values (WHERE clauses), dynamic column names in `ORDER BY` are often overlooked and cannot be parameterized. Custom QueryBuilders often lack automatic sanitization for identifiers.
 **Prevention:** Always whitelist dynamic column names against a strict set of allowed identifiers before using them in SQL construction. Implement "Safe by Default" sorting fallbacks.
+
+## 2025-02-18 - Parameterized OR Conditions in QueryBuilder
+**Vulnerability:** Found SQL injection risk in `whereOr` method of custom QueryBuilder which accepted raw string conditions without parameter support, leading to potential injection in `HeroTransactionRepository`.
+**Learning:** Custom ORM/QueryBuilders often miss edge cases like complex `OR` conditions with parameters. Always verify if helper methods support parameterization.
+**Prevention:** Extended `whereOr` to accept values and handle `0` placeholders for safe parameter injection.

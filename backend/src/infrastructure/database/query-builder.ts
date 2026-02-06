@@ -102,9 +102,19 @@ export class QueryBuilder {
     }
 
     // Add OR clause: (condition1 OR condition2 OR ...)
-    whereOr(conditions: string[]): this {
+    whereOr(conditions: string[], values: unknown[] = []): this {
         if (conditions.length === 0) return this;
-        this.whereClauses.push(`(${conditions.join(' OR ')})`);
+
+        let paramIndex = this.params.length;
+        const processedConditions = conditions.map((cond) =>
+            cond.replace(/\$\?/g, () => {
+                paramIndex++;
+                return `$${paramIndex}`;
+            })
+        );
+
+        this.whereClauses.push(`(${processedConditions.join(' OR ')})`);
+        this.params.push(...values);
         return this;
     }
 
