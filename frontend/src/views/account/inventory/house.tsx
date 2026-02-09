@@ -31,7 +31,11 @@ const Inventory: React.FC<InventoryProps> = (props) => {
     const params = {
       walletAddress: address,
       wallet_address: address,
-      houses: houses,
+      houses: JSON.parse(
+        JSON.stringify(houses, (_, v) =>
+          typeof v === "bigint" ? v.toString() : v
+        )
+      ),
     };
 
     const result = await axios.post(getAPI(network) + "users/decode", params);
