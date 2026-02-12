@@ -115,3 +115,11 @@ export interface IAdminRepository {
     // Get processing block numbers for both hero and house subscribers
     getProcessingBlockNumbers(): Promise<ProcessingBlockNumberRepr>;
 }
+
+import {UserGamification} from '../models/gamification';
+
+// Gamification repository interface
+export interface IGamificationRepository {
+    getByWallet(walletAddress: string): Promise<UserGamification>;
+    upsertXP(walletAddress: string, xpDelta: number): Promise<UserGamification>;
+}

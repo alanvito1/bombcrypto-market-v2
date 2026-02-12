@@ -11,9 +11,10 @@ import {BlockChainCenterApi, createBlockChainCenterApi} from '@/infrastructure/b
 import {BHeroMarketService, createBHeroMarketService} from '@/infrastructure/blockchain/contracts/bhero-market';
 import {createHeroBlockTrackingRepository} from '@/repositories/block-tracking.repository';
 import {createHeroTransactionRepository} from '@/repositories/hero-transaction.repository';
+import {createGamificationRepository} from '@/repositories/gamification.repository';
 import {createHeroSubscriber, HeroSubscriber, HeroSubscriberConfig} from '@/subscribers/hero-subscriber';
 import {createLogger, Logger} from '@/utils/logger';
-import {IBlockTrackingRepository, IHeroTransactionRepository} from '@/domain/interfaces/repository';
+import {IBlockTrackingRepository, IHeroTransactionRepository, IGamificationRepository} from '@/domain/interfaces/repository';
 
 // Application state
 interface AppState {
@@ -23,6 +24,7 @@ interface AppState {
     heroMarket: BHeroMarketService | null;
     blockRepo: IBlockTrackingRepository | null;
     heroRepo: IHeroTransactionRepository | null;
+    gamificationRepo: IGamificationRepository | null;
     subscriber: HeroSubscriber | null;
 }
 
@@ -33,6 +35,7 @@ const state: AppState = {
     heroMarket: null,
     blockRepo: null,
     heroRepo: null,
+    gamificationRepo: null,
     subscriber: null,
 };
 
@@ -95,6 +98,7 @@ async function initialize(): Promise<void> {
     // Create repositories
     state.blockRepo = createHeroBlockTrackingRepository(state.db, state.logger);
     state.heroRepo = createHeroTransactionRepository(state.db, state.logger);
+    state.gamificationRepo = createGamificationRepository(state.db, state.logger);
 
     // Create subscriber config
     const subscriberConfig: HeroSubscriberConfig = {
@@ -111,6 +115,7 @@ async function initialize(): Promise<void> {
         state.blockchainClient,
         state.blockRepo,
         state.heroRepo,
+        state.gamificationRepo,
         state.heroMarket,
         state.logger,
         subscriberConfig

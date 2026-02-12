@@ -6,7 +6,7 @@
 import {Log} from 'ethers';
 import {BaseSubscriber, SubscriberConfig} from './base-subscriber';
 import {BlockChainCenterApi} from '@/infrastructure/blockchain/blockchain-center-api';
-import {IBlockTrackingRepository, IHeroTransactionRepository} from '@/domain/interfaces/repository';
+import {IBlockTrackingRepository, IHeroTransactionRepository, IGamificationRepository} from '@/domain/interfaces/repository';
 import {BHeroMarketService} from '@/infrastructure/blockchain/contracts/bhero-market';
 import {
     ALL_MARKET_TOPICS,
@@ -40,12 +40,14 @@ export interface HeroSubscriberConfig extends SubscriberConfig {
 export class HeroSubscriber extends BaseSubscriber {
     private readonly heroRepo: IHeroTransactionRepository;
     private readonly heroMarket: BHeroMarketService;
+    private readonly gamificationRepo: IGamificationRepository;
     private readonly eventParser: EventParser;
 
     constructor(
         client: BlockChainCenterApi,
         blockRepo: IBlockTrackingRepository,
         heroRepo: IHeroTransactionRepository,
+        gamificationRepo: IGamificationRepository,
         heroMarket: BHeroMarketService,
         logger: Logger,
         config: HeroSubscriberConfig
@@ -56,6 +58,7 @@ export class HeroSubscriber extends BaseSubscriber {
         });
         this.heroRepo = heroRepo;
         this.heroMarket = heroMarket;
+        this.gamificationRepo = gamificationRepo;
         this.eventParser = new EventParser();
     }
 
@@ -200,6 +203,20 @@ export class HeroSubscriber extends BaseSubscriber {
 
         await this.heroRepo.upsert(req);
 
+        // Gamification: Award XP
+        // 1 BCOIN = 100 XP. Price has 18 decimals.
+        // XP = price / 1e16.
+        const xpAmount = Number(event.price / 10000000000000000n);
+        if (xpAmount > 0) {
+            try {
+                await this.gamificationRepo.upsertXP(event.buyer, xpAmount);
+                await this.gamificationRepo.upsertXP(event.seller, xpAmount);
+                this.logger.info('Awarded XP for Sold event', { xp: xpAmount, buyer: event.buyer, seller: event.seller });
+            } catch (err) {
+                 this.logger.error('Failed to award XP', err);
+            }
+        }
+
         this.logger.info('HeroSubscriber processed Sold', {
             tokenId: event.tokenId.toString(),
             seller: event.seller,
@@ -311,6 +328,7 @@ export function createHeroSubscriber(
     client: BlockChainCenterApi,
     blockRepo: IBlockTrackingRepository,
     heroRepo: IHeroTransactionRepository,
+    gamificationRepo: IGamificationRepository,
     heroMarket: BHeroMarketService,
     logger: Logger,
     config: HeroSubscriberConfig
@@ -319,6 +337,7 @@ export function createHeroSubscriber(
         client,
         blockRepo,
         heroRepo,
+        gamificationRepo,
         heroMarket,
         logger,
         config

@@ -1140,3 +1140,11 @@ CREATE UNIQUE INDEX idx_house_orders_tx_hash ON polygon.house_orders USING btree
 
 \unrestrict VB15RbISxfSDsw8h7DJL6PR73N9Xx1iLTgxRu41cdxh45WhlwxUbGFUDOc2n7ld
 
+
+CREATE TABLE IF NOT EXISTS user_gamification (
+    wallet_address VARCHAR(42) PRIMARY KEY,
+    xp BIGINT NOT NULL DEFAULT 0,
+    level INTEGER NOT NULL DEFAULT 1,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
