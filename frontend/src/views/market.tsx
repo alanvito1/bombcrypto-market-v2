@@ -183,6 +183,14 @@ const Statistics: React.FC = () => {
     });
   }, []);
 
+  useEffect(() => {
+    if (view === "pulse") {
+      handleParamChange("size", 100);
+    } else {
+      handleParamChange("size", 10);
+    }
+  }, [view, handleParamChange]);
+
   const fetch = async (params: ParamsState) => {
     if (unount) return;
     const result = convertFilter(params);
