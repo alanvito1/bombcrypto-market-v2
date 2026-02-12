@@ -21,6 +21,7 @@ import {createAdminRoutes} from '@/api/routes';
 import {createHeroTransactionRepository} from '@/repositories/hero-transaction.repository';
 import {createHouseTransactionRepository} from '@/repositories/house-transaction.repository';
 import {createWalletHistoryRepository} from '@/repositories/wallet-history.repository';
+import {createGamificationRepository} from '@/repositories/gamification.repository';
 import {createAdminRepository} from '@/repositories/block-tracking.repository';
 
 // Server dependencies
@@ -159,12 +160,14 @@ export class ApiServer {
         const houseTxRepo = createHouseTransactionRepository(db, logger);
         const walletHistoryRepo = createWalletHistoryRepository(db, logger);
         const adminRepo = createAdminRepository(db, logger);
+        const gamificationRepo = createGamificationRepository(db, logger);
 
         // API routes
         this.app.use(
             '/users',
             createUserRoutes({
                 walletHistoryRepo,
+                gamificationRepo,
                 cache: cacheSet.getCache,
                 logger,
             })

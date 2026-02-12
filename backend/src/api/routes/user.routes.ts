@@ -12,6 +12,7 @@ export function createUserRoutes(deps: UserHandlerDeps): Router {
 
     router.post('/decode', handlers.decode);
     router.get('/:walletAddress/history', handlers.getHistory);
+    router.get('/:walletAddress/gamification', handlers.getGamification);
 
     return router;
 }

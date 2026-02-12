@@ -1,6 +1,7 @@
 import {Request, Response} from 'express';
-import {IWalletHistoryRepository} from '@/domain/interfaces/repository';
+import {IWalletHistoryRepository, IGamificationRepository} from '@/domain/interfaces/repository';
 import {createEmptyWalletTxFilterContext, UserDetailsReq, UserRepr} from '@/domain/models/user';
+import {getGamificationStats} from '@/domain/models/gamification';
 import {MAX_PAGE_SIZE} from '@/domain/models/pagination';
 import {parseHeroDetails, parseHouseDetails} from '@/utils/details-parser';
 import {generateCacheKeyFromData, ICache} from '@/infrastructure/cache/memory-cache';
@@ -10,6 +11,7 @@ import {asyncHandler, HttpErrors} from '../middleware/error-handler';
 // User handler dependencies
 export interface UserHandlerDeps {
     walletHistoryRepo: IWalletHistoryRepository;
+    gamificationRepo?: IGamificationRepository; // Optional for compatibility/gradual rollout
     cache: ICache;
     logger: Logger;
 }
@@ -101,10 +103,34 @@ export function createGetHistoryHandler(deps: UserHandlerDeps) {
     });
 }
 
+/**
+ * GET /users/:walletAddress/gamification
+ * Get wallet gamification stats (XP, Level)
+ */
+export function createGetGamificationHandler(deps: UserHandlerDeps) {
+    return asyncHandler(async (req: Request, res: Response) => {
+        const walletAddress = req.params.walletAddress;
+
+        if (!walletAddress) {
+            throw HttpErrors.badRequest('wallet address is required');
+        }
+
+        if (!deps.gamificationRepo) {
+            throw HttpErrors.internal('Gamification repository not initialized');
+        }
+
+        const userGamification = await deps.gamificationRepo.getByWallet(walletAddress);
+        const stats = getGamificationStats(userGamification);
+
+        res.json(stats);
+    });
+}
+
 // Create all user handlers
 export function createUserHandlers(deps: UserHandlerDeps) {
     return {
         decode: createDecodeHandler(deps),
         getHistory: createGetHistoryHandler(deps),
+        getGamification: createGetGamificationHandler(deps),
     };
 }

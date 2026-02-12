@@ -15,6 +15,9 @@ abstract contract MarketCore {
     uint256 public cooldownBeforeCancel; // duration of an order before it is allowed to be cancelled, in seconds
     uint256 public cooldownByBlockNumber; // only allow to sell NFT that has blocknumber smaller than (block.number - cooldownByBlockNumber)
 
+    address public ludusTreasury; // Address to receive gamification funds
+    uint256 public ludusShare; // Share of the tax that goes to Ludus (0-10000, e.g. 2000 = 20%)
+
     struct RarityRule {
         bool isSellable;
         uint256 minPrice;
@@ -174,18 +177,35 @@ abstract contract MarketCore {
         // to the sender so we can't have a reentrancy attack.
         _removeOrder(_tokenId);
 
-        uint256 marketTax = _computeCut(_price);
-        uint256 amountSellerReceive = _price.sub(marketTax);
+        uint256 totalTax = _computeCut(_price);
+        uint256 ludusAmount = 0;
+
+        if (ludusTreasury != address(0) && ludusShare > 0) {
+            ludusAmount = totalTax * ludusShare / 10000;
+        }
+
+        uint256 marketAmount = totalTax - ludusAmount;
+        uint256 amountSellerReceive = _price.sub(totalTax);
 
         // reentrancy attack: we ensure the buyer pays enough funds before giving him the NFT.
         // If he tries to call this simultaneously, he is the one losing token.
         address tPay = getTokenPay(_tokenId);
         IBEP20 tk = tPay != address(0) ? IBEP20(tPay) : bcoinContract;
 
-        require(
-            tk.transferFrom(msg.sender, address(this), marketTax),
-            "fail to transfer bcoin to market"
-        );
+        if (marketAmount > 0) {
+            require(
+                tk.transferFrom(msg.sender, address(this), marketAmount),
+                "fail to transfer bcoin to market"
+            );
+        }
+
+        if (ludusAmount > 0) {
+             require(
+                tk.transferFrom(msg.sender, ludusTreasury, ludusAmount),
+                "fail to transfer bcoin to ludus"
+            );
+        }
+
         require(
             tk.transferFrom(msg.sender, seller, amountSellerReceive),
             "fail to transfer bcoin to seller"

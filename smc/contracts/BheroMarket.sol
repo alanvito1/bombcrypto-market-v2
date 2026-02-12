@@ -356,4 +356,14 @@ contract BHeroMarket is
     {
         cooldownByBlockNumber = _new;
     }
+
+    // @dev setLudusConfig sets the gamification treasury and share
+    function setLudusConfig(address _treasury, uint256 _share)
+        public
+        onlyRole(DESIGNER_ROLE)
+    {
+        require(_share <= 10000, "share must be in range 0-10000");
+        ludusTreasury = _treasury;
+        ludusShare = _share;
+    }
 }

@@ -6,6 +6,7 @@ import ConnectWallet from "../../buttons/ConnectWallet";
 import logo from "../../../assets/images/logo.png";
 import { useCart } from "../../../context/cart";
 import CartDrawer from "../../cart/CartDrawer";
+import LevelBadge from "../../gamification/LevelBadge";
 
 const HeaderComp: React.FC = () => {
   const { toggleCart, cartItems } = useCart();
@@ -33,6 +34,7 @@ const HeaderComp: React.FC = () => {
           </NavLink>
         </Nav>
         <SpaceRight>
+          <LevelBadge />
           <CartButton onClick={toggleCart}>
              CART <span>{cartItems.length}</span>
           </CartButton>
