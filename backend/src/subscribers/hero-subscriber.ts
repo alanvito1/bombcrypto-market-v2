@@ -18,6 +18,18 @@ import {
 } from '@/infrastructure/blockchain/events/parser';
 import {HeroTxReq, TX_STATUS} from '@/domain/models/hero';
 import {Logger} from '@/utils/logger';
+import {parseHeroDetails} from '@/utils/details-parser';
+
+/**
+ * XP Rewards by Rarity
+ * Common (0): 1 XP
+ * Rare (1): 2 XP
+ * Super Rare (2): 4 XP
+ * Epic (3): 5 XP
+ * Legend (4): 7 XP
+ * Super Legend (5): 9 XP
+ */
+const RARITY_XP_REWARDS = [1, 2, 4, 5, 7, 9];
 
 /**
  * Hero Subscriber Configuration
@@ -175,7 +187,8 @@ export class HeroSubscriber extends BaseSubscriber {
      * 1. Fetches block timestamp.
      * 2. Identifies payment token.
      * 3. Upserts order to DB with status 'sold'.
-     * 4. Triggers external notification webhook.
+     * 4. Calculates and awards XP based on rarity.
+     * 5. Triggers external notification webhook.
      *
      * @param {SoldEvent} event - The parsed event.
      */
@@ -204,17 +217,27 @@ export class HeroSubscriber extends BaseSubscriber {
         await this.heroRepo.upsert(req);
 
         // Gamification: Award XP
-        // 1 BCOIN = 100 XP. Price has 18 decimals.
-        // XP = price / 1e16.
-        const xpAmount = Number(event.price / 10000000000000000n);
-        if (xpAmount > 0) {
-            try {
+        // Calculate XP based on rarity
+        try {
+            const heroDetails = parseHeroDetails(event.tokenDetail.toString());
+            const rarity = heroDetails.rarity;
+            // Ensure rarity is within bounds, default to 1 (Common) if undefined
+            const xpAmount = RARITY_XP_REWARDS[rarity] !== undefined ? RARITY_XP_REWARDS[rarity] : 1;
+
+            if (xpAmount > 0) {
+                // Award XP to both buyer and seller to incentivize liquidity
                 await this.gamificationRepo.upsertXP(event.buyer, xpAmount);
                 await this.gamificationRepo.upsertXP(event.seller, xpAmount);
-                this.logger.info('Awarded XP for Sold event', { xp: xpAmount, buyer: event.buyer, seller: event.seller });
-            } catch (err) {
-                 this.logger.error('Failed to award XP', err);
+
+                this.logger.info('Awarded XP for Sold event', {
+                    xp: xpAmount,
+                    rarity,
+                    buyer: event.buyer,
+                    seller: event.seller
+                });
             }
+        } catch (err) {
+            this.logger.error('Failed to calculate/award XP', err);
         }
 
         this.logger.info('HeroSubscriber processed Sold', {

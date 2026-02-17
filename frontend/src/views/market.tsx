@@ -212,8 +212,38 @@ const Statistics: React.FC = () => {
       });
 
       const data = await getListTokenPay(listing);
+
+      // Fetch Seller Ranks (Gamification)
+      let dataWithRank = data;
+      try {
+        const sellerAddresses: string[] = Array.from(new Set((data as any[]).map((item: any) => item.seller_wallet_address))).filter((addr): addr is string => !!addr);
+
+        if (sellerAddresses.length > 0) {
+          const rankMap: Record<string, { rank: string, color: string }> = {};
+          const api = getAPI(network);
+          const baseUrl = api.endsWith('/') ? api : api + '/';
+
+          await Promise.all(sellerAddresses.map(async (addr) => {
+              try {
+                  const res = await axios.get(`${baseUrl}users/${addr}/gamification`);
+                  rankMap[addr] = { rank: res.data.rank, color: res.data.color };
+              } catch (e) {
+                  // Ignore errors
+              }
+          }));
+
+          dataWithRank = (data as any[]).map((item: any) => ({
+              ...item,
+              seller_rank_name: rankMap[item.seller_wallet_address]?.rank,
+              seller_rank_color: rankMap[item.seller_wallet_address]?.color
+          }));
+        }
+      } catch (err) {
+        console.error("Failed to fetch ranks", err);
+      }
+
       setPreHeroS(dataHeroS);
-      setData((data as ListItem[]) || []);
+      setData((dataWithRank as ListItem[]) || []);
       setParams((state) => ({
         ...state,
         page: page,
