@@ -10,11 +10,13 @@ import {
   mapTag,
   levelToPower,
   mapRarityShield,
+  minAddress,
 } from "../../utils/helper";
 import { HeroIcon } from "../hero";
 import _ from "lodash";
 import { IMAGE_TOKEN_SHOW, HeroType } from "../../utils/config";
 import { getShieldData } from "../Service/api";
+import RankBadge from "../market/rank-badge";
 
 interface ShieldData {
   heroType?: string;
@@ -39,6 +41,8 @@ interface HeroData {
   skin: number;
   color: number;
   seller_wallet_address?: string;
+  seller_rank_name?: string;
+  seller_rank_color?: string;
 }
 
 interface MarketBheroListProps {
@@ -77,6 +81,11 @@ const BHeroFullWidth: React.FC<MarketBheroListProps> = ({ data, network }) => {
         <div className="level">Level {data.level}</div>
         <Tag>#{data.token_id}</Tag>
         <Tag className={mapTag[data.rarity]}>{mapRarity(data.rarity)}</Tag>
+
+        <SellerInfo>
+            <span>{minAddress(data.seller_wallet_address)}</span>
+            <RankBadge rankName={data.seller_rank_name} color={data.seller_rank_color} mini />
+        </SellerInfo>
       </div>
       <div style={{ width: "35rem" }}>
         <div className="flex-skill">
@@ -198,6 +207,18 @@ const BHeroFullWidth: React.FC<MarketBheroListProps> = ({ data, network }) => {
     </Item>
   );
 };
+
+const SellerInfo = styled.div`
+  display: flex;
+  align-items: center;
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  color: ${({ theme }) => theme.colors.textSecondary};
+
+  span {
+    margin-right: 0.25rem;
+  }
+`;
 
 const Item = styled.div`
   display: flex;

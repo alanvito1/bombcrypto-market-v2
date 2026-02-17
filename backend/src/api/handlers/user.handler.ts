@@ -122,7 +122,15 @@ export function createGetGamificationHandler(deps: UserHandlerDeps) {
         const userGamification = await deps.gamificationRepo.getByWallet(walletAddress);
         const stats = getGamificationStats(userGamification);
 
-        res.json(stats);
+        res.json({
+            rank: stats.rank,
+            currentXP: stats.xp,
+            nextLevelXP: stats.nextLevelXp,
+            progressPercent: stats.progressPercent,
+            discountActive: stats.discountActive,
+            rankId: stats.rankId,
+            color: stats.color
+        });
     });
 }
 

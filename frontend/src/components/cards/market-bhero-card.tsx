@@ -1,10 +1,11 @@
 import React from "react";
 import styled from "styled-components";
 import { Tag } from "../common/style";
-import { mapRarity, bcoinFormat, mapTag } from "../../utils/helper";
+import { mapRarity, bcoinFormat, mapTag, minAddress } from "../../utils/helper";
 import { HeroIcon } from "../hero";
 import { IMAGE_TOKEN_SHOW } from "../../utils/config";
 import { useHistory } from "react-router-dom";
+import RankBadge from "../market/rank-badge";
 
 interface HeroData {
   token_id: string | number;
@@ -13,6 +14,9 @@ interface HeroData {
   isToken?: string;
   skin: number;
   color: number;
+  seller_wallet_address?: string;
+  seller_rank_name?: string;
+  seller_rank_color?: string;
 }
 
 interface BHeroCardProps {
@@ -47,6 +51,11 @@ const BHeroFullWidth: React.FC<BHeroCardProps> = ({ data }) => {
         <Tag className={mapTag[data.rarity]}>{mapRarity(data.rarity)}</Tag>
       </div>
 
+      <SellerInfo onClick={(e) => e.stopPropagation()}>
+        <span>Seller: {minAddress(data.seller_wallet_address)}</span>
+        <RankBadge rankName={data.seller_rank_name} color={data.seller_rank_color} mini />
+      </SellerInfo>
+
       <HeroIcon data={data} />
       <div className="footer">
         <img
@@ -55,11 +64,24 @@ const BHeroFullWidth: React.FC<BHeroCardProps> = ({ data }) => {
         />
         <b>{bcoinFormat(data.amount)} </b>
         <div className="toolip">{bcoinFormat(data.amount)}</div>
-        <span>$3200</span>
+        {/* Removed static price label */}
       </div>
     </Item>
   );
 };
+
+const SellerInfo = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  color: ${({ theme }) => theme.colors.textSecondary};
+
+  span {
+    margin-right: 0.25rem;
+  }
+`;
 
 const Item = styled.div`
   width: 14.5rem;
@@ -68,6 +90,8 @@ const Item = styled.div`
   padding: 0.563rem 0.438rem;
   cursor: pointer;
   transition: background 0.3s ease-in-out;
+  position: relative;
+
   &:hover, &:focus-visible {
     background: #000000;
     outline: none;
@@ -84,7 +108,7 @@ const Item = styled.div`
     }
   }
   .icon-hero {
-    margin-top: 3.063rem;
+    margin-top: 1rem;
     display: flex;
     justify-content: center;
 
@@ -97,7 +121,7 @@ const Item = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-top: 2.563rem;
+    margin-top: 1.5rem;
     margin-bottom: 1.125rem;
     img {
       width: 1.438rem;
@@ -119,5 +143,4 @@ const Item = styled.div`
 `;
 
 // ⚡ Bolt: Wrapped in React.memo to prevent unnecessary re-renders.
-// This component is rendered in a large list, so avoiding re-renders when data hasn't changed is critical for performance.
 export default React.memo(BHeroFullWidth);
