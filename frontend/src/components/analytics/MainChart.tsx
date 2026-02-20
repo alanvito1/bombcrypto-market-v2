@@ -1,13 +1,17 @@
 import React, { useEffect, useRef } from 'react';
-import { createChart, ColorType, CandlestickSeries } from 'lightweight-charts';
-import { useChartData } from '../../hooks/analytics/useChartData';
+import { createChart, ColorType, AreaSeries, UTCTimestamp } from 'lightweight-charts';
+import { PricePoint } from '../../hooks/analytics/useMarketHistory';
 
-const MainChart: React.FC = () => {
+interface MainChartProps {
+  priceHistory: PricePoint[];
+  loading?: boolean;
+}
+
+const MainChart: React.FC<MainChartProps> = ({ priceHistory, loading = false }) => {
   const chartContainerRef = useRef<HTMLDivElement>(null);
-  const { data } = useChartData();
 
   useEffect(() => {
-    if (!chartContainerRef.current || !data) return;
+    if (!chartContainerRef.current || loading || priceHistory.length === 0) return;
 
     const chart = createChart(chartContainerRef.current, {
       layout: {
@@ -20,17 +24,35 @@ const MainChart: React.FC = () => {
       },
       width: chartContainerRef.current.clientWidth,
       height: 400,
+      timeScale: {
+        timeVisible: true,
+        secondsVisible: false,
+      },
     });
 
-    const candleSeries = chart.addSeries(CandlestickSeries, {
-      upColor: '#00ff41',
-      downColor: '#ff0033',
-      borderVisible: false,
-      wickUpColor: '#00ff41',
-      wickDownColor: '#ff0033',
+    const areaSeries = chart.addSeries(AreaSeries, {
+      topColor: 'rgba(0, 255, 65, 0.56)',
+      bottomColor: 'rgba(0, 255, 65, 0.04)',
+      lineColor: 'rgba(0, 255, 65, 1)',
+      lineWidth: 2,
     });
 
-    candleSeries.setData(data);
+    // Ensure unique timestamps. If multiple sales occur at the same second, we keep the first one found.
+    const seen = new Set();
+    const uniqueData = priceHistory
+      .filter(item => {
+        const duplicate = seen.has(item.time);
+        seen.add(item.time);
+        return !duplicate;
+      })
+      .map(item => ({
+        time: item.time as UTCTimestamp,
+        value: item.value
+      }));
+
+    areaSeries.setData(uniqueData);
+
+    chart.timeScale().fitContent();
 
     const handleResize = () => {
       if (chartContainerRef.current) {
@@ -44,7 +66,10 @@ const MainChart: React.FC = () => {
       window.removeEventListener('resize', handleResize);
       chart.remove();
     };
-  }, [data]);
+  }, [priceHistory, loading]);
+
+  if (loading) return <div className="w-full h-[400px] flex items-center justify-center text-gray-500 font-mono">LOADING CHART DATA...</div>;
+  if (priceHistory.length === 0) return <div className="w-full h-[400px] flex items-center justify-center text-gray-500 font-mono">NO SALES DATA FOUND</div>;
 
   return <div ref={chartContainerRef} className="w-full h-[400px]" />;
 };

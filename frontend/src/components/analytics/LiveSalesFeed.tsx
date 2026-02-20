@@ -1,15 +1,22 @@
 import React from 'react';
-import { useLiveSales } from '../../hooks/analytics/useLiveSales';
 import classNames from 'classnames';
+import { Sale } from '../../hooks/analytics/useMarketHistory';
 
-const LiveSalesFeed: React.FC = () => {
-  const { sales } = useLiveSales();
+interface LiveSalesFeedProps {
+  sales: Sale[];
+  loading?: boolean;
+}
 
+const LiveSalesFeed: React.FC<LiveSalesFeedProps> = ({ sales, loading = false }) => {
   return (
     <div className="bg-[#111] border border-gray-800 h-full overflow-hidden flex flex-col font-mono text-xs">
       <div className="p-2 border-b border-gray-800 bg-[#0a0a0a] text-gray-400 font-bold flex justify-between sticky top-0 z-10">
         <span>RECENT TRADES</span>
-        <span className="text-red-500 animate-pulse">● LIVE</span>
+        {loading ? (
+            <span className="text-gray-500">LOADING...</span>
+        ) : (
+            <span className="text-red-500 animate-pulse">● LIVE</span>
+        )}
       </div>
       <div className="overflow-y-auto flex-1 custom-scrollbar">
         {sales.map((sale) => (
@@ -35,6 +42,9 @@ const LiveSalesFeed: React.FC = () => {
             </div>
           </div>
         ))}
+        {!loading && sales.length === 0 && (
+            <div className="p-4 text-center text-gray-500">No recent sales found.</div>
+        )}
       </div>
     </div>
   );
