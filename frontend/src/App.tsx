@@ -8,6 +8,7 @@ import AccountProvider, { useAccount } from "./context/account";
 import Account from "./views/account";
 import DetailHero from "./views/market/bhero-id";
 import DetailHouse from "./views/market/bhouse-id";
+import MarketAnalyticsDashboard from "./views/analytics/MarketAnalyticsDashboard";
 import NotificationProvider from "./context/notification";
 import { AnimatePresence } from "framer-motion";
 import AnimationLoad from "./components/common/animation";
@@ -72,6 +73,11 @@ const ContentRouter: React.FC = () => {
       <Route exact path="/market/bhouse/:id">
         <AnimationLoad>
           <DetailHouse />
+        </AnimationLoad>
+      </Route>
+      <Route exact path="/analytics">
+        <AnimationLoad>
+          <MarketAnalyticsDashboard />
         </AnimationLoad>
       </Route>
       <PrivateRoute path="/account">
