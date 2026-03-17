@@ -190,8 +190,14 @@ export class Subscriber {
                 url.searchParams.set('seller', sellerWalletAddress);
                 url.searchParams.set('reason', reason);
 
+                const headers: Record<string, string> = {};
+                if (this.config.internalWebhookSecret) {
+                    headers['x-internal-secret'] = this.config.internalWebhookSecret;
+                }
+
                 fetch(url.toString(), {
                     method: 'GET',
+                    headers,
                     signal: AbortSignal.timeout(5000),
                 }).catch(err => {
                     this.logger.error(`Failed to send unlock notification for token ${tokenId}: ${err}`);
