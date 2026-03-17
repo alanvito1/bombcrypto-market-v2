@@ -13,6 +13,7 @@ const SUBSCRIBER_CONFIGS: SubscriberConfig[] = [
         dbTable: 'hero_orders',
         idInConfig: 'bsc_hero',
         dbSearchPath: 'bsc',
+        unlockNotifyUrl: process.env.BSC_HERO_UNLOCK_WEBHOOK_URL,
     },
     {
         network: 'BSC',
@@ -21,6 +22,7 @@ const SUBSCRIBER_CONFIGS: SubscriberConfig[] = [
         dbTable: 'house_orders',
         idInConfig: 'bsc_house',
         dbSearchPath: 'bsc',
+        unlockNotifyUrl: process.env.BSC_HOUSE_UNLOCK_WEBHOOK_URL,
     },
     {
         network: 'POLYGON',
@@ -29,6 +31,7 @@ const SUBSCRIBER_CONFIGS: SubscriberConfig[] = [
         dbTable: 'hero_orders',
         idInConfig: 'polygon_hero',
         dbSearchPath: 'polygon',
+        unlockNotifyUrl: process.env.POLYGON_HERO_UNLOCK_WEBHOOK_URL,
     },
     {
         network: 'POLYGON',
@@ -37,6 +40,7 @@ const SUBSCRIBER_CONFIGS: SubscriberConfig[] = [
         dbTable: 'house_orders',
         idInConfig: 'polygon_house',
         dbSearchPath: 'polygon',
+        unlockNotifyUrl: process.env.POLYGON_HOUSE_UNLOCK_WEBHOOK_URL,
     },
 ];
 

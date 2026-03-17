@@ -120,7 +120,7 @@ export class Subscriber {
                 );
             } catch (e) {
                 if (String(e).includes('order not existed')) {
-                    await this.markDeleted(orderDbId, tokenId, 'order not existed');
+                    await this.markDeleted(record, 'order not existed');
                 }
                 return;
             }
@@ -137,7 +137,7 @@ export class Subscriber {
                 );
             } catch (e) {
                 if (String(e).includes('invalid token ID')) {
-                    await this.markDeleted(orderDbId, tokenId, 'Token not found or burned');
+                    await this.markDeleted(record, 'Token not found or burned');
                 }
                 return;
             }
@@ -146,8 +146,7 @@ export class Subscriber {
             const seller = orderData[1];
             if (seller.toLowerCase() !== ownerData.toLowerCase()) {
                 await this.markDeleted(
-                    orderDbId,
-                    tokenId,
+                    record,
                     `Owner (${ownerData}) and Seller (${seller}) mismatch`
                 );
                 return;
@@ -164,7 +163,7 @@ export class Subscriber {
                 );
 
                 if (!approved) {
-                    await this.markDeleted(orderDbId, tokenId, 'Not approved For All');
+                    await this.markDeleted(record, 'Not approved For All');
                 }
             } catch (e) {
                 this.logger.error(`error when checking approved: ${e} token_id: ${tokenId}`);
@@ -174,12 +173,33 @@ export class Subscriber {
         }
     }
 
-    private async markDeleted(orderDbId: number, tokenId: bigint, reason: string): Promise<void> {
+    private async markDeleted(record: OrderRecord, reason: string): Promise<void> {
+        const { id: orderDbId, tokenId, sellerWalletAddress } = record;
+
         await this.db.query(
             `UPDATE ${this.dbSearchPath}.${this.dbTable} SET deleted = true WHERE id = $1`,
             [orderDbId]
         );
         this.logger.info(`deleted: ${tokenId} (DB ID: ${orderDbId}) reason: ${reason}`);
+
+        // Send HTTP Webhook Notification to unlock NFT
+        if (this.config.unlockNotifyUrl) {
+            try {
+                const url = new URL(this.config.unlockNotifyUrl);
+                url.searchParams.set('tokenId', tokenId.toString());
+                url.searchParams.set('seller', sellerWalletAddress);
+                url.searchParams.set('reason', reason);
+
+                fetch(url.toString(), {
+                    method: 'GET',
+                    signal: AbortSignal.timeout(5000),
+                }).catch(err => {
+                    this.logger.error(`Failed to send unlock notification for token ${tokenId}: ${err}`);
+                });
+            } catch (err) {
+                this.logger.error(`Invalid unlockNotifyUrl or fetch configuration error: ${err}`);
+            }
+        }
     }
 
     async processBatch(batchSize: number = 50): Promise<number> {
