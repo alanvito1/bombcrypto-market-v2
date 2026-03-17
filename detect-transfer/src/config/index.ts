@@ -43,4 +43,8 @@ export function loadAppConfig(): AppConfig {
     return appConfigSchema.parse(rawConfig);
 }
 
+export function getInternalWebhookSecret(): string | undefined {
+    return process.env['INTERNAL_WEBHOOK_SECRET'];
+}
+
 export * from './types';

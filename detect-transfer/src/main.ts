@@ -1,4 +1,4 @@
-import {loadAppConfig, SubscriberConfig} from '@/config';
+import {loadAppConfig, SubscriberConfig, getInternalWebhookSecret} from '@/config';
 import {initLogger, getLogger} from '@/utils/logger';
 import {createPostgresPool} from '@/infrastructure/database/postgres';
 import {createRedisClient} from '@/infrastructure/redis/client';
@@ -14,6 +14,7 @@ const SUBSCRIBER_CONFIGS: SubscriberConfig[] = [
         idInConfig: 'bsc_hero',
         dbSearchPath: 'bsc',
         unlockNotifyUrl: process.env.BSC_HERO_UNLOCK_WEBHOOK_URL,
+        internalWebhookSecret: getInternalWebhookSecret(),
     },
     {
         network: 'BSC',
@@ -23,6 +24,7 @@ const SUBSCRIBER_CONFIGS: SubscriberConfig[] = [
         idInConfig: 'bsc_house',
         dbSearchPath: 'bsc',
         unlockNotifyUrl: process.env.BSC_HOUSE_UNLOCK_WEBHOOK_URL,
+        internalWebhookSecret: getInternalWebhookSecret(),
     },
     {
         network: 'POLYGON',
@@ -32,6 +34,7 @@ const SUBSCRIBER_CONFIGS: SubscriberConfig[] = [
         idInConfig: 'polygon_hero',
         dbSearchPath: 'polygon',
         unlockNotifyUrl: process.env.POLYGON_HERO_UNLOCK_WEBHOOK_URL,
+        internalWebhookSecret: getInternalWebhookSecret(),
     },
     {
         network: 'POLYGON',
@@ -41,6 +44,7 @@ const SUBSCRIBER_CONFIGS: SubscriberConfig[] = [
         idInConfig: 'polygon_house',
         dbSearchPath: 'polygon',
         unlockNotifyUrl: process.env.POLYGON_HOUSE_UNLOCK_WEBHOOK_URL,
+        internalWebhookSecret: getInternalWebhookSecret(),
     },
 ];
 

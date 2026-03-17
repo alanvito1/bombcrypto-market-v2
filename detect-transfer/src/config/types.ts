@@ -12,6 +12,7 @@ export const subscriberConfigSchema = z.object({
     idInConfig: z.string(),
     dbSearchPath: z.string(),
     unlockNotifyUrl: z.string().optional(),
+    internalWebhookSecret: z.string().optional(),
 });
 
 export const loggerConfigSchema = z.object({
