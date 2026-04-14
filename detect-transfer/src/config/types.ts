@@ -11,6 +11,7 @@ export const subscriberConfigSchema = z.object({
     dbTable: z.enum(['hero_orders', 'house_orders']),
     idInConfig: z.string(),
     dbSearchPath: z.string(),
+    unlockNotifyUrl: z.string().optional(),
 });
 
 export const loggerConfigSchema = z.object({
